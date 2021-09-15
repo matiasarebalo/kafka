@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, g, redirect, url_for
 from flask_cors import CORS
 from models import create_post, get_posts
 #from data import get_registered_user
@@ -21,8 +21,7 @@ def get_registered_user(name,post):
         "address" : post
         }
 
-
-
+# Deberia borrarse y pasar a home() (o usarse como home)
 @app.route('/', methods=['GET','POST'])
 def index():
 	
@@ -40,6 +39,47 @@ def index():
 
 	return render_template('index.html',posts=posts)
 	
+
+
+# Home. 
+# TODO: Hay que cambiar el endpoint a '/' cuando eliminemos index()
+@app.route('/home')
+def home():
+	return render_template('home/home.html')
+
+@app.route('/login', methods=['GET','POST'])
+def log_in():
+	if request.method == 'GET':
+		return render_template("home/log_in.html")	
+	if request.method == 'POST':
+		#... logica del login
+		return redirect(url_for("index"))
+
+@app.route('/signin', methods=['GET','POST'])
+def sig_in():
+	if request.method == 'GET':
+		return render_template("home/sign_in.html")	
+	if request.method == 'POST':
+		#... logica para registrarse
+		return redirect(url_for("index"))
+
+
+# Users functionality
+@app.route('/news')
+def news():
+	return render_template('users/news.html')
+
+@app.route('/publish')
+def publish():
+	return render_template('users/publish.html')
+
+@app.route('/search_users')
+def search_users():
+	return render_template('users/search_users.html')
+
+
+
+
 if __name__=='__main__':
 	#app.run(port=8081)
 	app.run(debug=True)
