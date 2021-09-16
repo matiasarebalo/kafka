@@ -7,10 +7,10 @@
                 <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
 
                 <div class="ml-1" style="transform: translateY(-2px)">
-                    <span class="d-block">Username (logged)</span>
+                    <span class="d-block">{{ user.username }}</span>
                     
                     <small style="opacity: 0.7">
-                        Name (logged)
+                        {{ user.name }}
                     </small>
                 </div>
             </a>
@@ -22,54 +22,24 @@
     </div>
 
     <div class="suggestions">
+        {% for user in all_users %}
         
-        <div class="d-flex p-2 align-items-center justify-content-between w-100">
-            <div>
-                <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
-                    
-                    <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
-
-                    <div class="ml-1" style="transform: translateY(-2px)">
-                        <span class="d-block">Username</span>
+            <div class="d-flex p-2 align-items-center justify-content-between w-100">
+                <div>
+                    <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
                         
-                        <small style="opacity: 0.7">
-                            Name
-                        </small>
-                    </div>
-                </a>
-            </div>
-        </div>
-        <div class="d-flex p-2 align-items-center justify-content-between w-100">
-            <div>
-                <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
-                    
-                    <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
+                        <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
 
-                    <div class="ml-1" style="transform: translateY(-2px)">
-                        <span class="d-block">Username</span>
-                        
-                        <small style="opacity: 0.7">
-                            Name
-                        </small>
-                    </div>
-                </a>
+                        <div class="ml-1" style="transform: translateY(-2px)">
+                            <span class="d-block">{{ user.username }}</span>
+                            
+                            <small style="opacity: 0.7">
+                                {{ user.name }}
+                            </small>
+                        </div>
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="d-flex p-2 align-items-center justify-content-between w-100">
-            <div>
-                <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
-                    
-                    <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
-
-                    <div class="ml-1" style="transform: translateY(-2px)">
-                        <span class="d-block">Username</span>
-                        
-                        <small style="opacity: 0.7">
-                            Name
-                        </small>
-                    </div>
-                </a>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 </div>

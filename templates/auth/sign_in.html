@@ -1,9 +1,9 @@
 {% extends "base_template.html" %}
 
-{% block title %}Registrarse{% endblock %}
+{% block title %}Registro{% endblock %}
 {% block content %}
 <div class="auth_page">
-    <form>
+    <form action="{{ url_for('sig_in') }}" method="post">
 
         <h3 class="text-uppercase text-center mb-2">Register</h3>
 
@@ -28,7 +28,7 @@
         </button>
 
         <p class="my-2">
-            You don't have an account?
+            You already have an account?
             <a href="{{ url_for('log_in') }}" style="color: crimson">
                 Login
             </a>

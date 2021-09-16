@@ -16,6 +16,14 @@
     </head>
     <body>
 
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-success mt-1">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     {%- if request.path != "/signin" and request.path != "/login" %}
         <div class="header bg-light">
 
