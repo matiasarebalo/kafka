@@ -1,0 +1,40 @@
+{% extends "base_template.html" %}
+
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div className="info">
+    <div class="info_container py-2">
+        <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="supper-avatar" />
+
+        <div class="info_content">
+            <div class="info_content_title">
+                <h2>Username</h2>
+                <button class="btn btn-outline-info">
+                    Edit Profile
+                </button>
+            </div>
+
+            <div class="follow_btn">
+                <span class="mr-4">
+                    <a href="{{ url_for('followers') }}">Followers</a>
+                </span>
+                <span class="ml-4">
+                    <a href="{{ url_for('following') }}">Following</a>
+                </span>
+            </div>
+
+            <div class="my-2">
+                <h6>Name</h6>
+            </div>
+
+            <a href="http://www.unla.edu.ar/" target="_blank">
+                http://www.unla.edu.ar/
+            </a>
+        </div>
+    </div>
+    <hr>
+</div>
+
+{% include 'posts/post_thumb.html' %}
+
+{% endblock %}

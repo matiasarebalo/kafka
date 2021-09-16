@@ -1,6 +1,10 @@
-{% extends "base_template.html" %}
+<form class="search_form">
+    <input type="text" name="search" id="search" />
 
-{% block title %}Buscar usuarios{% endblock %}
-{% block content %}
-    <h1>Listar todos los usuarios que pueda seguir</h1>
-{% endblock %}
+    <div class="search_icon">
+        <span class="material-icons">search</span>
+        <span>Search</span>
+    </div>
+
+    <button type="submit" style="display: none">Search</button>
+</form>

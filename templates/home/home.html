@@ -2,5 +2,13 @@
 
 {% block title %}Inicio{% endblock %}
 {% block content %}
-    <h1>Bienvenido</h1>
+<div class="home row mx-0">
+    <div class="col-md-8">
+        {% include 'home/status.html' %}
+    </div>
+    
+    <div class="col-md-4">
+        {% include 'home/right_side_bar.html' %}
+    </div>
+</div>
 {% endblock %}

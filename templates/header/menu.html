@@ -1,0 +1,38 @@
+<div class="menu">
+
+    <ul class="navbar-nav flex-row">
+
+        <div class="navbar-nav">
+            <a class="nav-link" href="{{ url_for('home') }}">
+                <i class="material-icons">home</i>
+            </a>
+            <a class="nav-link" href="#">
+                <i class="material-icons">near_me</i>
+            </a>
+            <a class="nav-link" href="{{ url_for('news') }}">
+                <i class="material-icons">explore</i>
+            </a>
+            <a class="nav-link" href="#">
+                <i class="material-icons">notifications</i>
+            </a>
+        </div>
+
+        <li class="nav-item dropdown">
+
+            <span class="nav-link dropdown-toggle" id="navbarDropdown" role="button" data-toggle="dropdown"
+                aria-haspopup="true" aria-expanded="false">
+                <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="small-avatar" />
+            </span>
+
+            <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item">
+                    Logout
+                </a>
+            </div>
+
+        </li>
+    </ul>
+
+</div>

@@ -1,0 +1,48 @@
+<div class="status my-3 d-flex">
+    <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
+    
+    <button class="statusBtn flex-fill" data-toggle="modal" data-target="#exampleModal">
+        Username, what are you thinking?
+    </button>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Create Post</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="status_modal">
+            <form>
+              <div class="status_body">
+                  <input name="title" placeholder="Title..."/>
+
+                  <textarea name="content" 
+                  placeholder="Content..."></textarea>
+
+                  <div class="input_images">
+
+                    <i class="fas fa-camera" onClick={handleStream}></i>
+
+                    <div class="file_upload">
+                        <i class="fas fa-image"></i>
+                        <input type="file" name="file" id="file"
+                        multiple accept="image/*,video/*" onChange={handleChangeImages} />
+                    </div>
+
+                  </div>
+              </div>
+              <button type="button" class="btn btn-dark w-100">Post</button>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>

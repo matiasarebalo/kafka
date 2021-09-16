@@ -1,0 +1,319 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+monospace;
+}
+
+.main {
+    max-width: 1000px;
+    width: 100%;
+    margin: auto;
+}
+
+img {
+    object-fit: cover;
+}
+
+.avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+
+/************************************* HEADER *********************************/
+
+.header {
+    width: 100%;
+    min-height: 70px;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    box-shadow: 0 0 10px #ddd;
+    background: #f8f9fa;
+    border: 1px solid rgb(0, 0, 0, .125);
+}
+
+.header .navbar {
+    width: 100%;
+    height: 100%;
+} 
+
+.header .navbar i{
+    font-size: 25px;
+} 
+
+
+.header .logo h1{
+    font-size: 1.5rem;
+} 
+
+.header .menu .material-icons{
+    font-size: 30px;
+}
+
+.header .menu .dropdown-menu {
+    position: absolute;
+    left: inherit;
+    right: 0;
+}
+
+.header .menu .label {
+    cursor: pointer;
+}
+
+/************************************* HEADER SEARCH *********************************/
+
+.header .search_form{
+    position: relative;
+}
+.header .search_form #search{
+    background: #fafafa;
+    border: 1px solid #ddd;
+    min-width: 250px;
+    width: 100%;
+    outline: none;
+    text-indent: 5px;
+    border-radius: 3px;
+}
+.header .search_form .search_icon{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 12px;
+    pointer-events: none;
+}
+.header .search_form .search_icon .material-icons{
+    font-size: 14px;
+    transform: translateY(3px);
+}
+
+
+/************************************* AUTH *********************************/
+
+.auth_page {
+    width: 100%;
+    min-height: 100vh;
+    background-color: #fdfdfd;
+    position: relative;
+}
+
+.auth_page form {
+    background: #fff;
+    max-width: 400px;
+    width: 100%;
+    border: 1px solid #ddd;
+    padding: 50px 25px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.small-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 20%;
+}
+
+.medium-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 30%;
+}
+
+.supper-avatar {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+}
+
+/************************************* PROFILE *********************************/
+
+.info {
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px 10px;
+}
+
+.info_container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.info_content {
+    min-width: 250px;
+    max-width: 550px;
+    width: 100%;
+    flex: 1;
+    opacity: 0.7;
+    margin: 0 15px;
+}
+
+.info_content_title {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.info_content_title h2{
+    font-size: 2rem;
+    font-weight: 400;
+    transform: translateY(4px);
+    flex: 3;
+}
+
+.info_container .follow_btn{
+    color: teal;
+    cursor: pointer;
+}
+
+.info_container .follow_btn span:hover{
+    text-decoration: underline;
+}
+
+/************************************* STATUS *********************************/
+
+.status{
+    background: white;
+    box-shadow: 0 0 5px #ddd;
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid rgb(0, 0, 0, .125);
+}
+.status .statusBtn{
+    background: #f1f1f1;
+    border: none;
+    outline: none;
+    border-radius: 30px;
+    color: #555;
+    padding: 0 10px;
+    text-align: left;
+    margin: 0 5px;
+}
+.status .statusBtn:hover{
+    background: #ddd;
+}
+
+
+/************************************* STATUS MODAL *********************************/
+
+
+.status_modal form{
+    max-width: 450px;
+    width: 100%;
+    background: white;
+    margin: 30px auto;
+}
+.status_header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    transform: translateY(-13px);
+} 
+.status_header span{
+    font-size: 2rem;
+    font-weight: 900;
+    cursor: pointer;
+    transform: translateY(-5px);
+}
+.status_body textarea{
+    width: 100%;
+    min-height: 150px;
+    border: none;
+    outline: none;
+    resize: none;
+    border-bottom: 1px solid #000000;
+}
+
+.status_body input{
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    border-bottom: 1px solid #000000;
+}
+
+.status_body .input_images{
+    display: flex;
+    justify-content: center;
+    margin: 10px 0;
+}
+.status_body .input_images i{
+    font-size: 2rem;
+    cursor: pointer;
+}
+.status_body .input_images .file_upload{
+    overflow: hidden;
+    margin: 0 10px;
+    position: relative;
+}
+.status_body .input_images .file_upload #file{
+    position: absolute;
+    top:0;
+    left: 0;
+    opacity: 0;
+}
+
+
+/************************************* POST THUMB *********************************/
+
+.post_thumb{
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    justify-content: center;
+    grid-gap: 10px;
+    overflow: hidden;
+    margin: 15px 0;
+}
+.post_thumb_display{
+    min-width: 300px;
+    height: 300px;
+    width: 100%;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+}
+.post_thumb_display img,
+.post_thumb_display video{
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+.post_thumb_display .post_thumb_menu{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0008;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: 0.3s;
+}
+.post_thumb_display:hover .post_thumb_menu{
+    opacity: 1;
+}
+.post_thumb_display .post_thumb_menu i{
+    font-size: 1.8rem;
+    color: white;
+    margin: 0 25px;
+}

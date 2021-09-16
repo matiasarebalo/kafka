@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, g, redirect, url_for
 from flask_cors import CORS
-from models import create_post, get_posts
+#from models import create_post, get_posts
 #from data import get_registered_user
-from kafka import KafkaProducer
+#from kafka import KafkaProducer
 import json
 import time
 app = Flask(__name__)
@@ -12,6 +12,7 @@ CORS(app)
 def json_serializer(data):
     return json.dumps(data).encode("utf-8")
 
+'''
 producer =KafkaProducer(bootstrap_servers=['127.0.0.1:9092'],
                         value_serializer=json_serializer)
 
@@ -20,6 +21,8 @@ def get_registered_user(name,post):
         "name" : name,
         "address" : post
         }
+
+'''
 
 # Deberia borrarse y pasar a home() (o usarse como home)
 @app.route('/', methods=['GET','POST'])
@@ -30,16 +33,15 @@ def index():
 	if request.method == 'POST':
 		name = request.form.get('name')
 		post = request.form.get('post')
-		registered_user = get_registered_user(name, post)
-		print(registered_user)
-		producer.send("registered_user",registered_user) 
+		#registered_user = get_registered_user(name, post)
+		#print(registered_user)
+		#producer.send("registered_user",registered_user) 
         #time.sleep(4)
 	
-	posts = get_posts()	
+	posts = [] #get_posts()	
 
 	return render_template('index.html',posts=posts)
 	
-
 
 # Home. 
 # TODO: Hay que cambiar el endpoint a '/' cuando eliminemos index()
@@ -77,7 +79,21 @@ def publish():
 def search_users():
 	return render_template('users/search_users.html')
 
+@app.route('/profile')
+def profile():
+	return render_template('users/profile.html')
 
+@app.route('/followers')
+def followers():
+	return render_template('users/followers.html')
+
+@app.route('/following')
+def following():
+	return render_template('users/following.html')
+
+@app.route('/posts/<idPost>', methods=['GET'])
+def post(idPost):
+	return render_template('posts/post.html')
 
 
 if __name__=='__main__':
