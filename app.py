@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, g, redirect, url_for, flash
+from flask import Flask, render_template, request, g, redirect, url_for, flash, jsonify
 from flask_cors import CORS
 #from models import create_post, get_posts
 #from data import get_registered_user
@@ -142,7 +142,7 @@ def sig_in():
 @login_required
 def logout():
 	logout_user()
-	return redirect(url_for("log_in"))
+	return redirect(url_for("log_inc"))
 
 # Users functionality
 @app.route('/news')
@@ -179,6 +179,19 @@ def following():
 @login_required
 def post(idPost):
 	return render_template('posts/post.html')
+
+@app.route('/search', methods=['GET', 'POST'])
+def search():
+
+	username=request.args.get('search')
+	
+	users = User.query
+
+	users = users.filter(User.name.like('%' + username + '%'))
+
+	users = users.order_by(User.name).all()
+
+	return jsonify(users_schema.dump(users))
 
 
 if __name__=='__main__':

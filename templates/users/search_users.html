@@ -1,5 +1,5 @@
 <form class="search_form">
-    <input type="text" name="search" id="search" />
+    <input type="text" name="search" id="search"  />
 
     <div class="search_icon">
         <span class="material-icons">search</span>
@@ -7,4 +7,61 @@
     </div>
 
     <button type="submit" style="display: none">Search</button>
+
+    <div class="position-absolute results">
+    </div>
 </form>
+
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+
+<script>
+    $( document ).ready(function() {
+
+        $(document).on('click','body',function(e){
+            /*
+            if(e.eventTarget !== 'foo'){
+            $('#bar').hide();
+            }*/
+        });
+
+        $("#search" ).keyup(function() {
+            $.ajax({
+                method: "GET",
+                url: `{{ url_for('search') }}`,
+                dataType: 'json',
+                data: {
+                    'search' : $("#search").val()
+                },
+                success: function (data) {   
+
+                    $(".results").html("");
+
+                    data.forEach(user_found => {
+                        $(".results").append(
+                            `<div class="d-flex p-2 pr-5 align-items-center justify-content-between w-100 border">
+                                <div>
+                                    <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
+                                        
+                                        <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
+                        
+                                        <div class="ml-1" style="transform: translateY(-2px)">
+                                            <span class="d-block">${user_found.username}</span>
+                                            
+                                            <small style="opacity: 0.7">
+                                                ${user_found.name}
+                                            </small>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>`
+                        )
+                    });
+                },
+                error: function () {
+                    console.log("No se ha podido obtener la información.");
+                }
+            });
+        });
+
+    });
+</script>
