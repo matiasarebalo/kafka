@@ -22,7 +22,6 @@ CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:test@localhost/redshift'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:2771999@localhost:3306/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -43,19 +42,9 @@ class Img(db.Model):
 	mimetype = db.Column(db.Text, nullable=False)
 	text = db.Column(db.Text)
 	title = db.Column(db.String(64))
+	iduser = db.Column(db.String(64))
 	location = db.Column(db.String(64))
 	pic_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-
-class FileContent(db.Model):
-    id = db.Column(db.Integer,  primary_key=True, autoincrement=True)
-    name = db.Column(db.String(128), nullable=False)
-    data = db.Column(db.LargeBinary, nullable=False) #Actual data, needed for Download
-    rendered_data = db.Column(db.Text, nullable=False)#Data to render the pic in browser
-    text = db.Column(db.Text)
-    location = db.Column(db.String(64))
-    pic_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
-def __repr__(self):
-    return f'Pic Name: {self.name} Data: {self.data} text: {self.text} created on: {self.pic_date} location: {self.location}'
 
 
 
@@ -162,11 +151,6 @@ def news():
 	return render_template('users/news.html')
 
 
-def render_picture(data):
-    render_pic = base64.b64encode(data).decode('ascii') 
-    return render_pic
-
-
 @app.route('/publish' , methods=['POST'])
 @login_required
 def upload():
@@ -176,9 +160,11 @@ def upload():
 	location = request.form['location']
 	filename = secure_filename(pic.filename)
 	mimetype = pic.mimetype
-	img = Img(img=pic.read(),mimetype=mimetype,title=title, name=filename,text=text, location=location )
+	id_user = User.username
+	img = Img(img=pic.read(),mimetype=mimetype,title=title,iduser=id_user, name=filename,text=text, location=location )
 	db.session.add(img)
 	db.session.commit
+	
 
 	return redirect(url_for("home"))
 
