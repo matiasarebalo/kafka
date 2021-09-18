@@ -1,9 +1,6 @@
 from flask import Flask, render_template, request, g, redirect, url_for, flash, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
-#from models import create_post, get_posts
-#from data import get_registered_user
-#from kafka import KafkaProducer
 import json
 import time
 import base64
@@ -16,12 +13,19 @@ from flask_login import LoginManager
 from flask_login import login_required, current_user, login_user, logout_user
 from flask_marshmallow import Marshmallow
 
+# Para la creacion del topic cuando se registra un nuevo usuarion en el sistema
+from kafka import KafkaProducer, producer
+from kafka.admin import KafkaAdminClient, NewTopic
+
+admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba")
+topic_list = []
+
 app = Flask(__name__)
 
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:test@localhost/redshift'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -46,17 +50,12 @@ class Img(db.Model):
 	location = db.Column(db.String(64))
 	pic_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
-
-
-
-
 db.create_all()
 ma = Marshmallow(app)
 
 class UserSchema(ma.Schema):
     class Meta:
         fields = ('id', 'name', 'username')
-
 
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
@@ -69,18 +68,6 @@ def load_user(user_id):
 def json_serializer(data):
     return json.dumps(data).encode("utf-8")
 
-'''
-producer =KafkaProducer(bootstrap_servers=['127.0.0.1:9092'],
-                        value_serializer=json_serializer)
-
-def get_registered_user(name,post):
-        return{
-        "name" : name,
-        "address" : post
-        }
-
-'''
-
 # Home. 
 @app.route('/')
 @login_required
@@ -91,9 +78,7 @@ def home():
 		print(results)
 		return render_template('home/home.html', user=current_user, all_users = results)
 
-
 # AUTH
-
 @app.route('/login', methods=['GET','POST'])
 def log_in():
 	if request.method == 'GET':
@@ -136,13 +121,18 @@ def sig_in():
 
 		login_user(User.query.filter_by(username=username).first())
 
+
+		# Creacion del topic correspondiente al usuario que se registra
+		topic_list.append(NewTopic(name=username, num_partitions=1, replication_factor=1))
+		admin_client.create_topics(new_topics=topic_list, validate_only=False)
+
 		return redirect(url_for("home"))
 
 @app.route("/logout")
 @login_required
 def logout():
 	logout_user()
-	return redirect(url_for("log_inc"))
+	return redirect(url_for("log_in"))
 
 # Users functionality
 @app.route('/news')
@@ -164,6 +154,12 @@ def upload():
 	img = Img(img=pic.read(),mimetype=mimetype,title=title,iduser=id_user, name=filename,text=text, location=location )
 	db.session.add(img)
 	db.session.commit
+	
+	# Creacion de la particion dentro del topic/usuario
+	nombre = current_user
+	producer = KafkaProducer(bootstrap_servers=['192.168.0.36:9092'], value_serializer=json_serializer)
+	# nombre.username es el topic donde publica y el string que sigue es lo que se guarda
+	producer.send(nombre.username, "Nuevo post")
 	
 
 	return redirect(url_for("home"))
@@ -207,7 +203,6 @@ def search():
 	users = users.order_by(User.name).all()
 
 	return jsonify(users_schema.dump(users))
-
 
 if __name__=='__main__':
 	#app.run(port=8081)
