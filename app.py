@@ -25,7 +25,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:2771999@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -203,6 +203,27 @@ def search():
 	users = users.order_by(User.name).all()
 
 	return jsonify(users_schema.dump(users))
+
+
+
+@app.route('/verPerfil', methods=['GET', 'POST'])
+def verPerfil():
+	
+	username=request.form['usuarioBuscado']
+
+	users = User.query
+
+	users = User.query.filter_by(username=username).first()
+
+	if(users):
+		return render_template('users/profile.html' , user=users)
+	else:
+		all_users= User.query.all()
+		results=users_schema.dump(User.query.all())
+		return render_template('home/home.html', user=current_user, all_users = results)
+
+
+
 
 if __name__=='__main__':
 	#app.run(port=8081)
