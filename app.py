@@ -1,8 +1,5 @@
 from flask import Flask, render_template, request, g, redirect, url_for, flash, jsonify
 from flask_cors import CORS
-#from models import create_post, get_posts
-#from data import get_registered_user
-#from kafka import KafkaProducer
 import json
 import time
 from flask_sqlalchemy import SQLAlchemy
@@ -11,12 +8,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager 
 from flask_login import login_required, current_user, login_user, logout_user
 from flask_marshmallow import Marshmallow
+
+# Para la creacion del topic cuando se registra un nuevo usuarion en el sistema
+from kafka import KafkaProducer
+from kafka.admin import KafkaAdminClient, NewTopic
+
+admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba")
+topic_list = []
+
 app = Flask(__name__)
 
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -37,7 +42,6 @@ class UserSchema(ma.Schema):
     class Meta:
         fields = ('id', 'name', 'username')
 
-
 user_schema = UserSchema()
 users_schema = UserSchema(many=True)
 
@@ -49,40 +53,9 @@ def load_user(user_id):
 def json_serializer(data):
     return json.dumps(data).encode("utf-8")
 
-'''
-producer =KafkaProducer(bootstrap_servers=['127.0.0.1:9092'],
-                        value_serializer=json_serializer)
-
-def get_registered_user(name,post):
-        return{
-        "name" : name,
-        "address" : post
-        }
-
-'''
-
-# Deberia borrarse y pasar a home() (o usarse como home)
-@app.route('/', methods=['GET','POST'])
-def index():
-	
-	if request.method == 'GET':
-		pass	
-	if request.method == 'POST':
-		name = request.form.get('name')
-		post = request.form.get('post')
-		#registered_user = get_registered_user(name, post)
-		#print(registered_user)
-		#producer.send("registered_user",registered_user) 
-        #time.sleep(4)
-	
-	posts = [] #get_posts()	
-
-	return render_template('index.html',posts=posts)
-	
-
 # Home. 
 # TODO: Hay que cambiar el endpoint a '/' cuando eliminemos index()
-@app.route('/home')
+@app.route('/')
 @login_required
 def home():
 	if request.method == 'GET':
@@ -91,9 +64,7 @@ def home():
 		print(results)
 		return render_template('home/home.html', user=current_user, all_users = results)
 
-
 # AUTH
-
 @app.route('/login', methods=['GET','POST'])
 def log_in():
 	if request.method == 'GET':
@@ -136,13 +107,18 @@ def sig_in():
 
 		login_user(User.query.filter_by(username=username).first())
 
+
+		# Creacion del topic correspondiente al usuario que se registra
+		topic_list.append(NewTopic(name=username, num_partitions=1, replication_factor=1))
+		admin_client.create_topics(new_topics=topic_list, validate_only=False)
+
 		return redirect(url_for("home"))
 
 @app.route("/logout")
 @login_required
 def logout():
 	logout_user()
-	return redirect(url_for("log_inc"))
+	return redirect(url_for("log_in"))
 
 # Users functionality
 @app.route('/news')
@@ -192,7 +168,6 @@ def search():
 	users = users.order_by(User.name).all()
 
 	return jsonify(users_schema.dump(users))
-
 
 if __name__=='__main__':
 	#app.run(port=8081)
