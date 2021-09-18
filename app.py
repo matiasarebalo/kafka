@@ -22,6 +22,7 @@ CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:test@localhost/redshift'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:2771999@localhost:3306/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -91,28 +92,8 @@ def get_registered_user(name,post):
 
 '''
 
-# Deberia borrarse y pasar a home() (o usarse como home)
-@app.route('/', methods=['GET','POST'])
-def index():
-	
-	if request.method == 'GET':
-		pass	
-	if request.method == 'POST':
-		name = request.form.get('name')
-		post = request.form.get('post')
-		#registered_user = get_registered_user(name, post)
-		#print(registered_user)
-		#producer.send("registered_user",registered_user) 
-        #time.sleep(4)
-	
-	posts = [] #get_posts()	
-
-	return render_template('index.html',posts=posts)
-	
-
 # Home. 
-# TODO: Hay que cambiar el endpoint a '/' cuando eliminemos index()
-@app.route('/home')
+@app.route('/')
 @login_required
 def home():
 	if request.method == 'GET':
