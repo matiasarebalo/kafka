@@ -17,7 +17,7 @@ from flask_marshmallow import Marshmallow
 from kafka import KafkaProducer, producer
 from kafka.admin import KafkaAdminClient, NewTopic
 
-admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba")
+admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba", api_version=(0, 10, 1))
 topic_list = []
 
 app = Flask(__name__)
@@ -25,7 +25,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:2771999@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -83,8 +83,7 @@ def home():
 def log_in():
 	if request.method == 'GET':
 		return render_template("auth/log_in.html")	
-
-	if request.method == 'POST':
+	elif request.method == 'POST':
 		username = request.form.get('username')
 		password = request.form.get('password')
 
@@ -102,26 +101,18 @@ def log_in():
 def sig_in():
 	if request.method == 'GET':
 		return render_template("auth/sign_in.html")	
-
-	if request.method == 'POST':
+	elif request.method == 'POST':
 		username = request.form.get('username')
 		name = request.form.get('name')
 		password = request.form.get('password')
-
 		user = User.query.filter_by(username=username).first()
-
 		if user:
 			flash('User already registered')
 			return redirect(url_for('sig_in'))
-
 		new_user = User(username=username, name=name, password=generate_password_hash(password, method='sha256'))
-
 		db.session.add(new_user)
 		db.session.commit()
-
 		login_user(User.query.filter_by(username=username).first())
-
-
 		# Creacion del topic correspondiente al usuario que se registra
 		topic_list.append(NewTopic(name=username, num_partitions=1, replication_factor=1))
 		admin_client.create_topics(new_topics=topic_list, validate_only=False)
@@ -150,21 +141,18 @@ def upload():
 	location = request.form['location']
 	filename = secure_filename(pic.filename)
 	mimetype = pic.mimetype
-	id_user = User.username
-	img = Img(img=pic.read(),mimetype=mimetype,title=title,iduser=id_user, name=filename,text=text, location=location )
+	id_user = User.query.filter_by(username=current_user.username).first().id
+
+	img = Img(img=pic.read(),mimetype=mimetype,title=title, iduser=id_user, name=filename,text=text, location=location )
 	db.session.add(img)
-	db.session.commit
-	
+	db.session.commit()
 	# Creacion de la particion dentro del topic/usuario
-	nombre = current_user
-	producer = KafkaProducer(bootstrap_servers=['192.168.0.36:9092'], value_serializer=json_serializer)
+	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
 	# nombre.username es el topic donde publica y el string que sigue es lo que se guarda
-	producer.send(nombre.username, "Nuevo post")
+	producer.send(current_user.username, "Nuevo post")
 	
 
 	return redirect(url_for("home"))
-
-
 
 @app.route('/search_users')
 @login_required
@@ -193,35 +181,23 @@ def post(idPost):
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-
 	username=request.args.get('search')
-	
 	users = User.query
-
 	users = users.filter(User.name.like('%' + username + '%'))
-
 	users = users.order_by(User.name).all()
-
 	return jsonify(users_schema.dump(users))
-
 
 
 @app.route('/verPerfil', methods=['GET', 'POST'])
 def verPerfil():
-	
 	username=request.form['usuarioBuscado']
-
-	users = User.query
-
 	users = User.query.filter_by(username=username).first()
-
 	if(users):
 		return render_template('users/profile.html' , user=users)
 	else:
 		all_users= User.query.all()
 		results=users_schema.dump(User.query.all())
 		return render_template('home/home.html', user=current_user, all_users = results)
-
 
 
 
