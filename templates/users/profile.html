@@ -9,9 +9,15 @@
         <div class="info_content">
             <div class="info_content_title">
                 <h2>{{ user.username }}</h2>
-                <button class="btn btn-outline-info">
-                    Edit Profile
-                </button>
+                {%- if request.path == '/verPerfil' %}
+                    <button class="btn btn-outline-info">
+                        Follow
+                    </button>
+                {% else %}
+                    <button class="btn btn-outline-info">
+                        Edit Profile
+                    </button>
+                {% endif %}
             </div>
 
             <div class="follow_btn">
@@ -27,7 +33,7 @@
                 <h6 class="text-capitalize">{{ user.name }}</h6>
             </div>
 
-            <a href="http://www.unla.edu.ar/" target="_blank">
+            <a class="text-info" href="http://www.unla.edu.ar/" target="_blank">
                 http://www.unla.edu.ar/
             </a>
         </div>

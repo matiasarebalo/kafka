@@ -35,7 +35,7 @@
                             $(".results").append(
                                 `<div class="d-flex p-2 pr-5 align-items-center justify-content-between w-100 border">
                                         <form class="search_form" method="POST" id="verPerfil" action="{{ url_for('verPerfil') }}" >
-                                            <div onclick="verPerfil.submit()">
+                                            <div onclick="verPerfil.submit()" class="d-flex p-2 pr-5 align-items-center justify-content-between w-100" style="cursor:pointer">
                                                 <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
                                 
                                                 <div class="ml-1" style="transform: translateY(-2px)">
