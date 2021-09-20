@@ -1,0 +1,14 @@
+<div class="header bg-light">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between align-middle px-5">
+        <a class="logo" href="{{ url_for('home') }}">
+            <h1 class="navbar-brand text-uppercase p-0 m-0">UNLa-Network</h1>
+        </a>
+
+        {% include 'users/search_users.html' %}
+
+        {% include 'header/menu.html' %}
+
+    </nav>
+
+</div>

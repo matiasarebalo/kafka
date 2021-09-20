@@ -31,6 +31,15 @@ img {
     border-radius: 50%;
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover {
+    color: black;
+}
+
 /************************************* HEADER *********************************/
 
 .header {
@@ -59,8 +68,9 @@ img {
     font-size: 1.5rem;
 } 
 
-.header .menu .material-icons{
+.header .menu .material-icons-outlined{
     font-size: 30px;
+    color: #000000;
 }
 
 .header .menu .dropdown-menu {
@@ -87,24 +97,38 @@ img {
     text-indent: 5px;
     border-radius: 3px;
     margin-bottom: 2px;
+    box-sizing: border-box;
+    background: url(https://cdn3.iconfinder.com/data/icons/google-material-design-icons/48/ic_search_48px-128.png);
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: 62px 5px;
 }
-.header .search_form .search_icon{
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 12px;
-    pointer-events: none;
+
+.header .search_form #search:focus {
+    padding-left: 16px;
+    background-position: 0;
 }
-.header .search_form .search_icon .material-icons{
-    font-size: 14px;
-    transform: translateY(3px);
-}
+
 
 .header .search_form .results {
     background: #fafafa;
     min-width: 250px;
 }
+
+.header .search_form input {
+    width: 200px;
+    padding-left: 80px;
+    box-sizing: border-box;
+    
+    background: url(https://cdn3.iconfinder.com/data/icons/google-material-design-icons/48/ic_search_48px-128.png);
+    background-size: 16px;
+    background-repeat: no-repeat;
+    background-position: 62px 0;
+  }
+  .header .search_form input:focus {
+    padding-left: 16px;
+    background-position: 0;
+  }
 
 /************************************* AUTH *********************************/
 

@@ -1,12 +1,63 @@
-<div class="row justify-content-center px-3">
-    <a href="{{ url_for('post', idPost=1) }}" style="text-decoration: none; color: inherit;">
+{%- if request.path == "/" %}
+    <div class="row justify-content-center px-3">
         <div class="card mt-2">
-            <img src="https://content.r9cdn.net/rimg/dimg/42/2f/addb7f9b-city-4012-16916c05055.jpg?width=1200&height=630&crop=true" class="card-img-top" alt="...">
+            <div class="card-header">
+                <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
+                    <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
+
+                    <div class="ml-1" style style="transform: translateY(-2px)">
+                        <span class="d-block">{{ user.username }}</span>
+                    </div>
+                </a>
+            </div>
+            <a href="{{ url_for('post', idPost=1) }}">
+            <img src="https://content.r9cdn.net/rimg/dimg/42/2f/addb7f9b-city-4012-16916c05055.jpg?width=1200&height=630&crop=true" class="card-img-top" style="border-radius: 0;" alt="...">
+            </a>
             <div class="card-body">
-                <h5 class="card-title">Card title</h5>
+                <h6 class="card-title">                
+                    <a href="{{ url_for('profile') }}">
+                        <span class="material-icons-outlined" style="vertical-align: -6px;">
+                        thumb_up
+                        </span> <span>75 Likes</span>
+                    </a>
+                </h6>
+                <h6 class="card-title"><a href="{{ url_for('profile') }}">{{ user.username }}</a></h6>
                 <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
                 <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
             </div>
         </div>
-    </a>
-</div>
+    </div>
+
+{% else %}
+
+    <div class="row justify-content-center px-3">
+        <div class="col-md-10">
+            <div class="card mt-2">
+                <div class="row no-gutters" style="min-height: 400px;">
+                    <div class="col-md-7 bg-dark">
+                        <img src="https://content.r9cdn.net/rimg/dimg/42/2f/addb7f9b-city-4012-16916c05055.jpg?width=1200&height=630&crop=true" style="border-radius: 0; width: 100%; height: 100%;" alt="...">
+                    </div>
+                    <div class="col-md-5">
+                        <div class="card-body">
+                            <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
+                                <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="small-avatar" />
+            
+                                <div class="ml-1" style style="transform: translateY(-2px)">
+                                    <span class="d-block">{{ user.username }}</span>
+                                </div>
+                            </a>
+                            <hr>
+                            <p class="card-text">This is a wider card with supporting text below as a natural lead-in to additional content. This content is a little bit longer.</p>
+                            <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                            <hr>
+                            <span class="material-icons-outlined" style="vertical-align: -6px;">
+                                thumb_up
+                            </span> 75 Likes
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endif %}

@@ -1,14 +1,15 @@
 <div class="mt-3 position-fixed">
 
-    <div class="d-flex p-2 pr-5 align-items-center justify-content-between w-100 border" style="padding-right: 100px !important;">
+    <div class="d-flex p-2 pr-5 align-items-center justify-content-between w-100 border"
+        style="padding-right: 100px !important;">
         <div>
             <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
-                
+
                 <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
 
                 <div class="ml-1" style="transform: translateY(-2px)">
                     <span class="d-block">{{ user.username }}</span>
-                    
+
                     <small style="opacity: 0.7">
                         {{ user.name }}
                     </small>
@@ -27,7 +28,7 @@
                 <div class="d-flex p-2 align-items-center justify-content-between w-100">
                     <div>
                         <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('verPerfil') }}" >
-                            <div onclick="verPerfil.submit()">
+                            <div onclick="verPerfil.submit()" class="d-flex align-items-center justify-content-between w-100">
                                 <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
                 
                                 <div class="ml-1" style="transform: translateY(-2px)">
@@ -37,7 +38,7 @@
                             </div>
                         </form>
                         <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('follow') }}" >
-                            <div onclick="follow.submit()">
+                            <div onclick="follow.submit()" class="d-flex align-items-center justify-content-between w-100">
                                 <div class="ml-1" style="transform: translateY(-2px)">
                                     <button type="submit">Seguir</button>                               
                                     <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">

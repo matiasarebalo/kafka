@@ -4,22 +4,22 @@
 
         <li class="nav-item">
             <a class="nav-link" href="{{ url_for('home') }}">
-                <span class="material-icons">home</span>
+                <span class="material-icons-outlined">home</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">
-                <span class="material-icons">near_me</span>
+                <span class="material-icons-outlined">near_me</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{{ url_for('news') }}">
-                <span class="material-icons">explore</span>
+                <span class="material-icons-outlined">explore</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="#">
-                <span class="material-icons">notifications</span>
+                <span class="material-icons-outlined">notifications</span>
             </a>
         </li>
 
@@ -31,7 +31,10 @@
             </span>
 
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="{{ url_for('profile') }}">Profile</a>
+                <a class="dropdown-item" href="{{ url_for('profile') }}">
+                    <span class="material-icons-outlined" style="vertical-align: -6px;">
+                    account_circle
+                    </span> <span>Profile</span></a>
                 <div class="dropdown-divider"></div>
                 <a class="dropdown-item" href="{{ url_for('logout') }}">
                     Logout

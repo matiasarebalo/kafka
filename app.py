@@ -72,11 +72,9 @@ def json_serializer(data):
 @app.route('/')
 @login_required
 def home():
-	if request.method == 'GET':
-		all_users= User.query.all()
-		results=users_schema.dump(User.query.all())
-		print(results)
-		return render_template('home/home.html', user=current_user, all_users = results)
+	username = current_user.username
+	results=users_schema.dump(User.query.filter(User.username!=username))
+	return render_template('home/home.html', user=current_user, all_users = results)
 
 # AUTH
 @app.route('/login', methods=['GET','POST'])
@@ -176,7 +174,7 @@ def following():
 @app.route('/posts/<idPost>', methods=['GET'])
 @login_required
 def post(idPost):
-	return render_template('posts/post.html')
+	return render_template('posts/post.html', user=current_user)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
@@ -194,7 +192,6 @@ def verPerfil():
 	if(users):
 		return render_template('users/profile.html' , user=users)
 	else:
-		all_users= User.query.all()
 		results=users_schema.dump(User.query.all())
 		return render_template('home/home.html', user=current_user, all_users = results)
 
