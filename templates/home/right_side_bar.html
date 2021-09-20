@@ -16,33 +16,37 @@
             </a>
         </div>
     </div>
-
+    <br><br>
     <div class="d-flex justify-content-between align-items-center my-2">
         <h5>Amigos sugeridos</h5>
     </div>
 
     <div class="suggestions">
         {% for user in all_users %}
-        
-            <div class="d-flex p-2 align-items-center justify-content-between w-100">
-                <div>
-                    <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('verPerfil') }}" >
-                        <div onclick="verPerfil.submit()">
-                            <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
-            
-                            <div class="ml-1" style="transform: translateY(-2px)">
-                                <a class="d-block" onclick="document.getElementById('{{ user.username }}').submit()">{{ user.username }}</a>
-                                
-                                <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
-
-                                <small style="opacity: 0.7" onclick="verPerfil.submit()">
-                                    {{ user.name }}
-                                </small>
+            {% if user.username != current_user.username %}
+                <div class="d-flex p-2 align-items-center justify-content-between w-100">
+                    <div>
+                        <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('verPerfil') }}" >
+                            <div onclick="verPerfil.submit()">
+                                <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
+                
+                                <div class="ml-1" style="transform: translateY(-2px)">
+                                    <a class="d-block" onclick="document.getElementById('{{ user.username }}').submit()">{{ user.name }} (@{{ user.username }})</a>
+                                    <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
+                                </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                        <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('follow') }}" >
+                            <div onclick="follow.submit()">
+                                <div class="ml-1" style="transform: translateY(-2px)">
+                                    <button type="submit">Seguir</button>                               
+                                    <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            {% endif %}
         {% endfor %}
     </div>
 </div>

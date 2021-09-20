@@ -42,7 +42,7 @@ class User(UserMixin, db.Model):
 class Img(db.Model):
 	id = db.Column(db.Integer,  primary_key=True, autoincrement=True)
 	name = db.Column(db.String(128), nullable=False)
-	img = db.Column(db.Text, nullable=False) 
+	img = db.Column(db.LargeBinary(length=(2**32)-1), nullable=False) 
 	mimetype = db.Column(db.Text, nullable=False)
 	text = db.Column(db.Text)
 	title = db.Column(db.String(64))
@@ -143,7 +143,7 @@ def upload():
 	mimetype = pic.mimetype
 	id_user = User.query.filter_by(username=current_user.username).first().id
 
-	img = Img(img=pic.read(),mimetype=mimetype,title=title, iduser=id_user, name=filename,text=text, location=location )
+	img = Img(img=base64.b64encode(pic.read()),mimetype=mimetype,title=title, iduser=id_user, name=filename,text=text, location=location )
 	db.session.add(img)
 	db.session.commit()
 	# Creacion de la particion dentro del topic/usuario
@@ -151,7 +151,6 @@ def upload():
 	# nombre.username es el topic donde publica y el string que sigue es lo que se guarda
 	producer.send(current_user.username, "Nuevo post")
 	
-
 	return redirect(url_for("home"))
 
 @app.route('/search_users')
@@ -199,7 +198,15 @@ def verPerfil():
 		results=users_schema.dump(User.query.all())
 		return render_template('home/home.html', user=current_user, all_users = results)
 
-
+@app.route('/follow', methods=['POST'])
+def follow():
+	username=request.form['usuarioBuscado']
+	user_id = User.query.filter_by(username=username).first().id
+	print(user_id)
+	# Aca va el codigo para seguir al usuario al usuario
+	#
+	#
+	return redirect(url_for("home"))
 
 if __name__=='__main__':
 	#app.run(port=8081)
