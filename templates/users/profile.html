@@ -41,6 +41,8 @@
     <hr>
 </div>
 
-{% include 'posts/post_thumb.html' %}
+{% for post in posts %}
+    {% include 'posts/post_thumb.html' %}
+{% endfor %}
 
 {% endblock %}

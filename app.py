@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 import json
 import time
 import base64
+import os
 
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
@@ -12,6 +13,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager 
 from flask_login import login_required, current_user, login_user, logout_user
 from flask_marshmallow import Marshmallow
+
+from schemas.user import UserSchema
+from schemas.post import PostSchema
 
 # Para la creacion del topic cuando se registra un nuevo usuarion en el sistema
 from kafka import KafkaProducer, producer
@@ -25,8 +29,9 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
 db = SQLAlchemy(app)
 login_manager = LoginManager()
@@ -34,36 +39,36 @@ login_manager.login_view = 'log_in'
 login_manager.init_app(app)
 
 class User(UserMixin, db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True)
-    password = db.Column(db.String(100))
-    name = db.Column(db.String(1000))
+	id = db.Column(db.Integer, primary_key=True)
+	username = db.Column(db.String(100), unique=True)
+	password = db.Column(db.String(100))
+	name = db.Column(db.String(1000))
+	posts = db.relationship('Post', backref='user', lazy='dynamic')
 
-class Img(db.Model):
+
+class Post(db.Model):
 	id = db.Column(db.Integer,  primary_key=True, autoincrement=True)
-	name = db.Column(db.String(128), nullable=False)
-	img = db.Column(db.LargeBinary(length=(2**32)-1), nullable=False) 
-	mimetype = db.Column(db.Text, nullable=False)
+	img = db.Column(db.String(100))
 	text = db.Column(db.Text)
 	title = db.Column(db.String(64))
 	iduser = db.Column(db.String(64))
-	location = db.Column(db.String(64))
-	pic_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+	date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 db.create_all()
-ma = Marshmallow(app)
-
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = ('id', 'name', 'username')
 
 user_schema = UserSchema()
+
 users_schema = UserSchema(many=True)
+
+post_schema = PostSchema()
+
+posts_schema = PostSchema(many=True)
+
 
 @login_manager.user_loader
 def load_user(user_id):
-        # since the user_id is just the primary key of our user table, use it in the query for the user
-        return User.query.get(int(user_id))
+    return User.query.get(int(user_id))
 
 def json_serializer(data):
     return json.dumps(data).encode("utf-8")
@@ -73,8 +78,9 @@ def json_serializer(data):
 @login_required
 def home():
 	username = current_user.username
-	results=users_schema.dump(User.query.filter(User.username!=username))
-	return render_template('home/home.html', user=current_user, all_users = results)
+	results = users_schema.dump(User.query.filter(User.username!=username))
+	posts = posts_schema.dump(Post.query.all())
+	return render_template('home/home.html', user = current_user, all_users = results, posts = posts )
 
 # AUTH
 @app.route('/login', methods=['GET','POST'])
@@ -127,23 +133,24 @@ def logout():
 @app.route('/news')
 @login_required
 def news():
-	return render_template('users/news.html')
+	posts = posts_schema.dump(Post.query.all())
+	return render_template('users/news.html', posts = posts)
 
 
 @app.route('/publish' , methods=['POST'])
 @login_required
 def upload():
-	pic = request.files['inputFile']
 	title= request.form['title']
 	text = request.form['text']
-	location = request.form['location']
-	filename = secure_filename(pic.filename)
-	mimetype = pic.mimetype
 	id_user = User.query.filter_by(username=current_user.username).first().id
+	file = request.files['inputFile']
+	filename = secure_filename(file.filename)
+	file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-	img = Img(img=base64.b64encode(pic.read()),mimetype=mimetype,title=title, iduser=id_user, name=filename,text=text, location=location )
+	img = Post(title=title, iduser=id_user, text=text, img=filename, user_id=current_user.id)
 	db.session.add(img)
 	db.session.commit()
+
 	# Creacion de la particion dentro del topic/usuario
 	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
 	# nombre.username es el topic donde publica y el string que sigue es lo que se guarda
@@ -159,7 +166,8 @@ def search_users():
 @app.route('/profile')
 @login_required
 def profile():
-	return render_template('users/profile.html' , user=current_user)
+	posts = Post.query.filter_by(id=current_user.id)
+	return render_template('users/profile.html' , user = current_user, posts = posts_schema.dump(posts))
 
 @app.route('/followers')
 @login_required
@@ -174,7 +182,9 @@ def following():
 @app.route('/posts/<idPost>', methods=['GET'])
 @login_required
 def post(idPost):
-	return render_template('posts/post.html', user=current_user)
+	post = Post.query.filter_by(id=idPost).first()
+	print(post_schema.dump(post))
+	return render_template('posts/post.html', user = current_user, post = post_schema.dump(post))
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
@@ -188,9 +198,10 @@ def search():
 @app.route('/verPerfil', methods=['GET', 'POST'])
 def verPerfil():
 	username=request.form['usuarioBuscado']
-	users = User.query.filter_by(username=username).first()
-	if(users):
-		return render_template('users/profile.html' , user=users)
+	user = User.query.filter_by(username=username).first()
+	if(user):
+		posts = Post.query.filter_by(id=user.id)
+		return render_template('users/profile.html' , user = user_schema.dump(user), posts = posts_schema.dump(posts))
 	else:
 		results=users_schema.dump(User.query.all())
 		return render_template('home/home.html', user=current_user, all_users = results)

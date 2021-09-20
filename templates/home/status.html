@@ -21,19 +21,17 @@
             <form method="POST" action="/publish" enctype="multipart/form-data">
               <div class="status_body">
                   <input name="title" placeholder="Title..."/>
-                  <input name="location" placeholder="Location..."/>
 
                   <textarea name="text" 
                   placeholder="Content..."></textarea>
 
                   <div class="input_images">
 
-                    <i class="fas fa-camera" onClick={handleStream}></i>
+                    <i class="fas fa-camera"></i>
 
                     <div class="file_upload">
                         <i class="fas fa-image"></i>
-                        <input type="file" name="inputFile" id="file"
-                        multiple accept="image/*,video/*" onChange={handleChangeImages} />
+                        <input type="file" name="inputFile" id="file"/>
                     </div>
 
                   </div>

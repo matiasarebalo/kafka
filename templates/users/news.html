@@ -2,5 +2,9 @@
 
 {% block title %}News{% endblock %}
 {% block content %}
-    {% include 'posts/post_thumb.html' %}
+    <div class="post_thumb">
+        {% for post in posts %}
+                {% include 'posts/post_thumb.html' %}
+        {% endfor %}
+    </div>
 {% endblock %}

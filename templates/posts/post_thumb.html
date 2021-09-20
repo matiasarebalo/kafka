@@ -1,15 +1,10 @@
-<div class="post_thumb">
-    {% for i in range(3) %}
-        <a href="{{ url_for('post', idPost=1) }}">
-            <div class="post_thumb_display">
-                <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" alt={post.images[0].url} />
-                <div class="post_thumb_menu">
-                    <span class="material-icons-outlined" style="vertical-align: -6px;">
-                        thumb_up
-                    </span> 75
-                </div>
-            </div>
-        </a>
-    {% endfor %}
-
-</div>
+<a href="{{ url_for('post', idPost=post.id) }}">
+    <div class="post_thumb_display">
+        <img src="{{ url_for('static', filename='uploads/') }}{{ post['img'] }}" />
+        <div class="post_thumb_menu">
+            <span class="material-icons-outlined" style="vertical-align: -6px;">
+                thumb_up
+            </span> 75
+        </div>
+    </div>
+</a>
