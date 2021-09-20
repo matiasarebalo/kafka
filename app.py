@@ -17,7 +17,7 @@ from flask_marshmallow import Marshmallow
 from schemas.user import UserSchema
 from schemas.post import PostSchema
 
-# Para la creacion del topic cuando se registra un nuevo usuarion en el sistema
+# Para la creacion del topic cuando se registra un nuevo usuario en el sistema
 from kafka import KafkaProducer, producer
 from kafka.admin import KafkaAdminClient, NewTopic
 
@@ -29,7 +29,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -166,7 +166,7 @@ def search_users():
 @app.route('/profile')
 @login_required
 def profile():
-	posts = Post.query.filter_by(id=current_user.id)
+	posts = Post.query.filter_by(iduser=current_user.id)
 	return render_template('users/profile.html' , user = current_user, posts = posts_schema.dump(posts))
 
 @app.route('/followers')
@@ -200,11 +200,12 @@ def verPerfil():
 	username=request.form['usuarioBuscado']
 	user = User.query.filter_by(username=username).first()
 	if(user):
-		posts = Post.query.filter_by(id=user.id)
+		posts = Post.query.filter_by(iduser=user.id)
 		return render_template('users/profile.html' , user = user_schema.dump(user), posts = posts_schema.dump(posts))
 	else:
 		results=users_schema.dump(User.query.all())
 		return render_template('home/home.html', user=current_user, all_users = results)
+
 
 @app.route('/follow', methods=['POST'])
 def follow():
