@@ -4,7 +4,11 @@
 
         <li class="nav-item">
             <a class="nav-link" href="{{ url_for('home') }}">
-                <span class="material-icons-outlined">home</span>
+                {% if request.path == "/" %}
+                    <span class="material-icons">home</span>
+                {% else %}
+                    <span class="material-icons-outlined">home</span>
+                {% endif %}
             </a>
         </li>
         <li class="nav-item">
@@ -14,7 +18,11 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{{ url_for('news') }}">
+                {% if request.path == "/news" %}
+                <span class="material-icons">explore</span>
+                {% else %}
                 <span class="material-icons-outlined">explore</span>
+                {% endif %}
             </a>
         </li>
         <li class="nav-item">

@@ -5,7 +5,7 @@
 <div class="home row mx-0">
     <div class="col-md-8">
         {% include 'home/status.html' %}
-        {% for i in range(4) %}
+        {% for post in posts %}
             {% include 'posts/card_post.html' %}
         {% endfor %}
     </div>
