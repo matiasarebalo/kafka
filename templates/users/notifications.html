@@ -1,0 +1,26 @@
+{% extends "base_template.html" %}
+
+{% block title %}Notifications{% endblock %}
+{% block content %}
+    <div class="row my-3">
+        {% for n in notif %}
+            <div class="d-flex p-2 pr-5 align-items-center justify-content-between w-100 mb-2 border"
+                style="padding-right: 100px !important;">
+                <div>
+                    <a class="d-flex align-items-center">
+        
+                        <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
+        
+                        <div class="ml-1" style="transform: translateY(-2px)">
+                            <span class="d-block">user.username </span>
+        
+                            <small style="opacity: 0.7">
+                                {{ n.value }}
+                            </small>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
