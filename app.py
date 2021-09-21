@@ -28,7 +28,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:20101990@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
