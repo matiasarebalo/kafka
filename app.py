@@ -38,12 +38,22 @@ login_manager = LoginManager()
 login_manager.login_view = 'log_in'
 login_manager.init_app(app)
 
+#subs = db.Table('subs', db.Column('user_id', db.ForeignKey('user.id')),
+#db.Column('me_id', db.ForeignKey('me.id')))
+
 class User(UserMixin, db.Model):
 	id = db.Column(db.Integer, primary_key=True)
 	username = db.Column(db.String(100), unique=True)
 	password = db.Column(db.String(100))
 	name = db.Column(db.String(1000))
 	posts = db.relationship('Post', backref='user', lazy='dynamic')
+	subscribers= db.relationship('Me', backref='user', lazy= 'dynamic')
+
+class Me(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	followname = db.Column(db.String(1000))
+	followid = db.Column(db.Integer)
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
 
 class Post(db.Model):
@@ -223,10 +233,19 @@ def like():
 @login_required
 def follow():
 	username=request.form['usuarioBuscado']
-	user_id = User.query.filter_by(username=username).first().id
-	print(user_id)
+	follow_id = User.query.filter_by(username=username).first().id
+	id_user = User.query.filter_by(username=current_user.username).first().id
+	# Creacion de la particion dentro del topic/usuario
+	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
+	# nombre.username es el topic donde publica y el string que sigue es lo que se guarda
+	producer.send(username, "{} Te sigue".format(current_user.username))
+	
+	print(follow_id)
 	# Aca va el codigo para seguir al usuario al usuario
-	#
+	me = Me(followname=username, user_id=id_user,followid=follow_id)
+	db.session.add(me)
+	db.session.commit()
+
 	#
 	return redirect(url_for("home"))
 
