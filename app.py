@@ -213,7 +213,11 @@ def logout():
 @app.route('/news')
 @login_required
 def news():
-	posts = posts_schema.dump(Post.query.all())
+	#posts = posts_schema.dump(Post.query.all())
+	posts= db.session.query(Post,User,Me).join(User).join(Me).filter(Post.user_id==Me.followid).all()
+	#filter(Post.user_id=Me.followid).all()
+	return render_template('users/news.html', posts = posts)
+
 	return render_template('users/news.html', posts = posts)
 
 
