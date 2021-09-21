@@ -15,10 +15,10 @@
             </a>
             <div class="card-body">
                 <h6 class="card-title">                
-                    <a href="{{ url_for('profile') }}">
+                    <a href="{{ url_for('follow') }}">
                         <span class="material-icons-outlined" style="vertical-align: -6px;">
                         thumb_up
-                        </span> <span>75 Likes</span>
+                        </span>
                     </a>
                 </h6>
                 <h6 class="card-title"><a href="{{ url_for('profile') }}">{{ post.user.username }}</a></h6>
@@ -50,9 +50,11 @@
                             <p class="card-text">{{ post.text }}</p>
                             <p class="card-text"><small class="text-muted">{{ post.date }}</small></p>
                             <hr>
-                            <span class="material-icons-outlined" style="vertical-align: -6px;">
+                            <a href="{{ url_for('follow') }}">
+                                <span class="material-icons-outlined" style="vertical-align: -6px;">
                                 thumb_up
-                            </span> 75 Likes
+                                </span>
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -17,8 +17,8 @@ from flask_marshmallow import Marshmallow
 from schemas.user import UserSchema
 from schemas.post import PostSchema
 
-# Para la creacion del topic cuando se registra un nuevo usuarion en el sistema
-from kafka import KafkaProducer, producer
+# Para la creacion del topic cuando se registra un nuevo usuario en el sistema
+from kafka import KafkaProducer, KafkaConsumer, producer
 from kafka.admin import KafkaAdminClient, NewTopic
 
 admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba", api_version=(0, 10, 1))
@@ -29,7 +29,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:test@localhost/redshift'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -58,7 +58,7 @@ class Me(db.Model):
 
 class Post(db.Model):
 	id = db.Column(db.Integer,  primary_key=True, autoincrement=True)
-	img = db.Column(db.String(100))
+	img = db.Column(db.String(100), nullable=True)
 	text = db.Column(db.Text)
 	title = db.Column(db.String(64))
 	iduser = db.Column(db.String(64))
@@ -155,9 +155,12 @@ def upload():
 	id_user = User.query.filter_by(username=current_user.username).first().id
 	file = request.files['inputFile']
 	filename = secure_filename(file.filename)
-	file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-	img = Post(title=title, iduser=id_user, text=text, img=filename, user_id=current_user.id)
+	try:
+		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+		img = Post(title=title, iduser=id_user, text=text, img=filename, user_id=current_user.id)
+	except:
+		print("No hay foto")
+		img = Post(title=title, iduser=id_user, text=text, img=None, user_id=current_user.id)
 	db.session.add(img)
 	db.session.commit()
 
@@ -176,7 +179,7 @@ def search_users():
 @app.route('/profile')
 @login_required
 def profile():
-	posts = Post.query.filter_by(id=current_user.id)
+	posts = Post.query.filter_by(iduser=current_user.id)
 	return render_template('users/profile.html' , user = current_user, posts = posts_schema.dump(posts))
 
 @app.route('/followers')
@@ -197,6 +200,7 @@ def post(idPost):
 	return render_template('posts/post.html', user = current_user, post = post_schema.dump(post))
 
 @app.route('/search', methods=['GET', 'POST'])
+@login_required
 def search():
 	username=request.args.get('search')
 	users = User.query
@@ -204,19 +208,29 @@ def search():
 	users = users.order_by(User.name).all()
 	return jsonify(users_schema.dump(users))
 
-
 @app.route('/verPerfil', methods=['GET', 'POST'])
+@login_required
 def verPerfil():
 	username=request.form['usuarioBuscado']
 	user = User.query.filter_by(username=username).first()
 	if(user):
-		posts = Post.query.filter_by(id=user.id)
+		posts = Post.query.filter_by(iduser=user.id)
 		return render_template('users/profile.html' , user = user_schema.dump(user), posts = posts_schema.dump(posts))
 	else:
 		results=users_schema.dump(User.query.all())
 		return render_template('home/home.html', user=current_user, all_users = results)
 
+
+@app.route('/like', methods=['POST'])
+@login_required
+def like():
+	id_post=request.form['idPost']
+	
+
+	return redirect(url_for("home"))
+
 @app.route('/follow', methods=['POST'])
+@login_required
 def follow():
 	username=request.form['usuarioBuscado']
 	follow_id = User.query.filter_by(username=username).first().id
