@@ -1,3 +1,4 @@
+from threading import local
 from flask import Flask, render_template, request, g, redirect, url_for, flash, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
@@ -19,17 +20,26 @@ from schemas.post import PostSchema
 
 # Para la creacion del topic cuando se registra un nuevo usuario en el sistema
 from kafka import KafkaProducer, KafkaConsumer, producer
+from flask_socketio import SocketIO, emit
+import uuid
+import asyncio
+from multiprocessing import Process
+
+# Para la creacion del topic cuando se registra un nuevo usuarion en el sistema
+from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 from kafka.admin import KafkaAdminClient, NewTopic
 
 admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba", api_version=(0, 10, 1))
 topic_list = []
+notificaciones_user = []
+posts_followed = []
 
 app = Flask(__name__)
 
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:20101990@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -90,7 +100,61 @@ def home():
 	username = current_user.username
 	results = users_schema.dump(User.query.filter(User.username!=username))
 	posts = posts_schema.dump(Post.query.all())
-	return render_template('home/home.html', user = current_user, all_users = results, posts = posts )
+
+	get_notificaciones()
+
+	return render_template('home/home.html', user = current_user, all_users = results, posts = posts, notif=notificaciones_user)
+
+
+def get_notificaciones():
+	# Topic con las notificaciones del usuario logueado
+	username = current_user.username
+	notificaciones = []
+	topic_notif = username + '_notificaciones'
+
+	consumer_notificaciones = KafkaConsumer(bootstrap_servers=['localhost:9092'], consumer_timeout_ms=1000)
+
+	# Topic del propio usuario para saber si si alguien le dio like o lo sigue 
+	notificaciones.append(topic_notif)
+	tp_usr = TopicPartition(topic=topic_notif, partition=0)
+
+	consumer_notificaciones.assign([tp_usr])
+
+	consumer_notificaciones.seek_to_end(tp_usr)
+	fin = consumer_notificaciones.position(tp_usr)
+	consumer_notificaciones.seek_to_beginning(tp_usr)
+
+	for notificacion in consumer_notificaciones:
+		notificaciones_user.append(notificacion)
+		if fin == notificacion.offset:
+			break
+
+	consumer_notificaciones.close()
+
+def get_post_kafka():
+	# Topic con las notificaciones para posts nuevos
+	username = current_user.username
+	followed = [] # Cargar con los usuarios a los que sigue
+	tp_usr = []
+	consumer_posts = KafkaConsumer(bootstrap_servers=['localhost:9092'], consumer_timeout_ms=1000)
+
+	# Topic del propio usuario para saber si si alguien le dio like o lo sigue
+	for usr in followed:
+		tp_usr.append(TopicPartition(topic=usr, partition=0))
+	
+	consumer_posts.assign(tp_usr)
+
+	for tp in tp_usr:
+		consumer_posts.seek_to_end(tp)
+		fin = consumer_posts.position(tp)
+		consumer_posts.seek_to_beginning(tp)
+
+		for posts in consumer_posts:
+			posts_followed.append(posts)
+			if fin == posts.offset:
+				break
+
+	consumer_posts.close()
 
 # AUTH
 @app.route('/login', methods=['GET','POST'])
@@ -127,8 +191,14 @@ def sig_in():
 		db.session.add(new_user)
 		db.session.commit()
 		login_user(User.query.filter_by(username=username).first())
-		# Creacion del topic correspondiente al usuario que se registra
+
+		# Creacion del topic correspondiente al usuario que se registra para guardar sus posteos
 		topic_list.append(NewTopic(name=username, num_partitions=1, replication_factor=1))
+		admin_client.create_topics(new_topics=topic_list, validate_only=False)
+
+		# Creacion del topic para notificaciones (Donde escriben los likes y seguidores nuevos)
+		topic_notif = username + '_notificaciones'
+		topic_list.append(NewTopic(name=topic_notif, num_partitions=1, replication_factor=1))
 		admin_client.create_topics(new_topics=topic_list, validate_only=False)
 
 		return redirect(url_for("home"))
@@ -166,9 +236,9 @@ def upload():
 
 	# Creacion de la particion dentro del topic/usuario
 	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
-	# nombre.username es el topic donde publica y el string que sigue es lo que se guarda
 	producer.send(current_user.username, "Nuevo post")
-	
+	producer.close()
+
 	return redirect(url_for("home"))
 
 @app.route('/search_users')
@@ -235,20 +305,38 @@ def follow():
 	username=request.form['usuarioBuscado']
 	follow_id = User.query.filter_by(username=username).first().id
 	id_user = User.query.filter_by(username=current_user.username).first().id
-	# Creacion de la particion dentro del topic/usuario
-	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
-	# nombre.username es el topic donde publica y el string que sigue es lo que se guarda
-	producer.send(username, "{} Te sigue".format(current_user.username))
 	
-	print(follow_id)
 	# Aca va el codigo para seguir al usuario al usuario
 	me = Me(followname=username, user_id=id_user,followid=follow_id)
 	db.session.add(me)
 	db.session.commit()
 
 	#
+	user_id = User.query.filter_by(username=username).first().id
+
+	# Agrega a la lista de seguidores al usuario logueado
+	nombre = current_user
+	topic_notif = username + '_notificaciones'
+	consumer = KafkaConsumer(group_id=nombre.username, bootstrap_servers=['localhost:9092'], consumer_timeout_ms=1000)
+	tp = TopicPartition(username, 0)
+	consumer.assign([tp])
+
+	consumer.seek_to_end(tp)
+	last_offset = consumer.position(tp)
+	consumer.seek_to_beginning(tp)
+
+	for m in consumer:
+		if m.offset == last_offset - 1:
+			break
+
+	consumer.close()
+
+	# Envía la notificación al usuario al que comenzó a seguir
+	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
+	producer.send(topic_notif, "Comenzo a seguirte " + nombre.username)
+	producer.close()
+
 	return redirect(url_for("home"))
 
 if __name__=='__main__':
-	#app.run(port=8081)
 	app.run(debug=True)
