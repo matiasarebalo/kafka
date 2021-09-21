@@ -1,10 +1,7 @@
-from threading import local
 from flask import Flask, render_template, request, g, redirect, url_for, flash, jsonify
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import json
-import time
-import base64
 import os
 
 from datetime import datetime
@@ -13,24 +10,15 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager 
 from flask_login import login_required, current_user, login_user, logout_user
-from flask_marshmallow import Marshmallow
 
 from schemas.user import UserSchema
 from schemas.post import PostSchema
-
-# Para la creacion del topic cuando se registra un nuevo usuario en el sistema
-from kafka import KafkaProducer, KafkaConsumer, producer
-from flask_socketio import SocketIO, emit
-import uuid
-import asyncio
-from multiprocessing import Process
 
 # Para la creacion del topic cuando se registra un nuevo usuarion en el sistema
 from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 from kafka.admin import KafkaAdminClient, NewTopic
 
 admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba", api_version=(0, 10, 1))
-topic_list = []
 notificaciones_user = []
 posts_followed = []
 
@@ -193,13 +181,15 @@ def sig_in():
 		login_user(User.query.filter_by(username=username).first())
 
 		# Creacion del topic correspondiente al usuario que se registra para guardar sus posteos
-		topic_list.append(NewTopic(name=username, num_partitions=1, replication_factor=1))
-		admin_client.create_topics(new_topics=topic_list, validate_only=False)
+		tl1 = []
+		tl1.append(NewTopic(name=username, num_partitions=1, replication_factor=1))
+		admin_client.create_topics(new_topics=tl1, validate_only=False)
 
 		# Creacion del topic para notificaciones (Donde escriben los likes y seguidores nuevos)
+		tl2 = []
 		topic_notif = username + '_notificaciones'
-		topic_list.append(NewTopic(name=topic_notif, num_partitions=1, replication_factor=1))
-		admin_client.create_topics(new_topics=topic_list, validate_only=False)
+		tl2.append(NewTopic(name=topic_notif, num_partitions=1, replication_factor=1))
+		admin_client.create_topics(new_topics=tl2, validate_only=False)
 
 		return redirect(url_for("home"))
 
