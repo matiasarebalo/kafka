@@ -17,6 +17,7 @@ from flask_marshmallow import Marshmallow
 
 from schemas.user import UserSchema
 from schemas.post import PostSchema
+from schemas.me import MeSchema
 
 # Para la creacion del topic cuando se registra un nuevo usuario en el sistema
 from kafka import KafkaProducer, KafkaConsumer, producer
@@ -39,7 +40,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:20101990@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -85,6 +86,10 @@ post_schema = PostSchema()
 
 posts_schema = PostSchema(many=True)
 
+me_schema = MeSchema()
+
+mes_schema = MeSchema(many=True)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -100,10 +105,8 @@ def home():
 	username = current_user.username
 	results = users_schema.dump(User.query.filter(User.username!=username))
 	posts = posts_schema.dump(Post.query.all())
-
-	get_notificaciones()
-
-	return render_template('home/home.html', user = current_user, all_users = results, posts = posts, notif=notificaciones_user)
+	
+	return render_template('home/home.html', user = current_user, all_users = results, posts = posts)
 
 
 def get_notificaciones():
@@ -260,7 +263,8 @@ def followers():
 @app.route('/following')
 @login_required
 def following():
-	return render_template('users/following.html')
+	following = mes_schema.dump(Me.query.filter(Me.user_id==current_user.id).all())
+	return render_template('users/following.html', following=following)
 
 @app.route('/posts/<idPost>', methods=['GET'])
 @login_required
@@ -337,6 +341,13 @@ def follow():
 	producer.close()
 
 	return redirect(url_for("home"))
+
+@app.route('/notifications', methods=['GET'])
+@login_required
+def notifications():
+	get_notificaciones()
+	return render_template('users/notifications.html', notif=notificaciones_user)
+
 
 if __name__=='__main__':
 	app.run(debug=True)

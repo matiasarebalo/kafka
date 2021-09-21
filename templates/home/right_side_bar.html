@@ -4,7 +4,6 @@
         style="padding-right: 100px !important;">
         <div>
             <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
-
                 <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
 
                 <div class="ml-1" style="transform: translateY(-2px)">
@@ -17,8 +16,7 @@
             </a>
         </div>
     </div>
-    <br><br>
-    <div class="d-flex justify-content-between align-items-center my-2">
+    <div class="d-flex justify-content-between align-items-center my-2 mt-4">
         <h5>Amigos sugeridos</h5>
     </div>
 
@@ -26,38 +24,29 @@
         {% for user in all_users %}
             {% if user.username != current_user.username %}
                 <div class="d-flex p-2 align-items-center justify-content-between w-100">
-                    <div>
-                        <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('verPerfil') }}" >
-                            <div onclick="verPerfil.submit()" class="d-flex align-items-center justify-content-between w-100">
-                                <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
-                
-                                <div class="ml-1" style="transform: translateY(-2px)">
-                                    <a class="d-block" onclick="document.getElementById('{{ user.username }}').submit()">{{ user.name }} (@{{ user.username }})</a>
-                                    <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
-                                </div>
+                    <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('verPerfil') }}" >
+                        <div onclick="document.getElementById('{{ user.username }}').submit()"  class="d-flex align-items-center justify-content-between w-100" style="cursor: pointer;">
+                            <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
+            
+                            <div class="ml-1" style="transform: translateY(-2px)">
+                                <a class="d-block">{{ user.name }} (@{{ user.username }})</a>
+                                <small style="opacity: 0.7">
+                                    {{ user.name }}
+                                </small>
+                                <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
                             </div>
-                        </form>
-                        <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('follow') }}" >
-                            <div onclick="follow.submit()" class="d-flex align-items-center justify-content-between w-100">
-                                <div class="ml-1" style="transform: translateY(-2px)">
-                                    <button type="submit">Seguir</button>                               
-                                    <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
-                                </div>
+                        </div>
+                    </form>
+                    <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('follow') }}" >
+                        <div onclick="follow.submit()" class="d-flex align-items-center justify-content-between w-100">
+                            <div class=" small ml-1 mt-4" style="transform: translateY(-2px); top: 0;" >
+                                <button type="submit" style="opacity: 0.7; border: none; cursor: pointer; text-decoration: underline;">Seguir</button>                               
+                                <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
                             </div>
-                        </form>
-                    </div>
+                        </div>
+                    </form>
                 </div>
             {% endif %}
-        {% endfor %}
-    </div>
-
-    <div class="container">
-        {% for n in notif %}
-            
-            <div class="container">
-                {{ n.value }}
-            </div>
-        
         {% endfor %}
     </div>
 

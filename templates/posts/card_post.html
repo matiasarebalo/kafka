@@ -2,16 +2,31 @@
     <div class="row justify-content-center px-3">
         <div class="card mt-2 w-100">
             <div class="card-header">
-                <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
-                    <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
+                {% if post.user.username == user.username %}
+                    <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
+                        <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
 
-                    <div class="ml-1" style style="transform: translateY(-2px)">
-                        <span class="d-block">{{ post.user.username }}</span>
-                    </div>
-                </a>
+                        <div class="ml-1" style style="transform: translateY(-2px)">
+                            <span class="d-block">{{ post.user.username }}</span>
+                        </div>
+                    </a>
+                {% else %}
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <form class="search_form" method="POST" id="{{ post.user.username }}" action="{{ url_for('verPerfil') }}" >
+                        <div onclick="document.getElementById('{{ post.user.username }}').submit()"  class="d-flex align-items-center justify-content-between w-100" style="cursor: pointer;">
+                            <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
+            
+                            <div class="ml-1" style="transform: translateY(-2px)">
+                                <a class="d-block">{{ post.user.name }}</a>
+                                <input style="display: none;" name="usuarioBuscado" value="{{ post.user.username }}">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
             </div>
             <a href="{{ url_for('post', idPost=post.id) }}">
-            <img src="{{ url_for('static', filename='uploads/') }}{{ post['img'] }}" class="card-img-top" style="border-radius: 0;" alt="...">
+                <img src="{{ url_for('static', filename='uploads/') }}{{ post['img'] }}" class="card-img-top" style="border-radius: 0;" alt="...">
             </a>
             <div class="card-body">
                 <h6 class="card-title">                
@@ -21,7 +36,18 @@
                         </span>
                     </a>
                 </h6>
-                <h6 class="card-title"><a href="{{ url_for('profile') }}">{{ post.user.username }}</a></h6>
+                <h6 class="card-title">
+                    {% if post.user.username == user.username %}
+                        <a href="{{ url_for('profile') }}">{{ post.user.username }}</a>
+                    {% else %}
+                        <form class="search_form" method="POST" id="{{ post.user.username }}" action="{{ url_for('verPerfil') }}" >
+                            <div onclick="document.getElementById('{{ post.user.username }}').submit()"  class="d-flex align-items-center justify-content-between w-100" style="cursor: pointer;">                    
+                                <a class="d-block">{{ post.user.name }}</a>
+                                <input style="display: none;" name="usuarioBuscado" value="{{ post.user.username }}">
+                            </div>
+                        </form>
+                    {% endif %}
+                </h6>
                 <p class="card-text">{{ post.text }}</p>
                 <p class="card-text"><small class="text-muted">{{ post.date }}</small></p>
             </div>
@@ -39,13 +65,28 @@
                     </div>
                     <div class="col-md-5">
                         <div class="card-body">
-                            <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
-                                <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="small-avatar" />
+                            {% if post.user.username == user.username %}
+                                <a href="{{ url_for('profile') }}" class="d-flex align-items-center">
+                                    <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" class="medium-avatar" />
             
-                                <div class="ml-1" style style="transform: translateY(-2px)">
-                                    <span class="d-block">{{ post.user.username }}</span>
-                                </div>
-                            </a>
+                                    <div class="ml-1" style style="transform: translateY(-2px)">
+                                        <span class="d-block">{{ post.user.username }}</span>
+                                    </div>
+                                </a>
+                            {% else %}
+                            <div class="d-flex align-items-center justify-content-between w-100">
+                                <form class="search_form" method="POST" id="{{ post.user.username }}" action="{{ url_for('verPerfil') }}" >
+                                    <div onclick="document.getElementById('{{ post.user.username }}').submit()"  class="d-flex align-items-center justify-content-between w-100" style="cursor: pointer;">
+                                        <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
+                        
+                                        <div class="ml-1" style="transform: translateY(-2px)">
+                                            <a class="d-block">{{ post.user.name }}</a>
+                                            <input style="display: none;" name="usuarioBuscado" value="{{ post.user.username }}">
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            {% endif %}
                             <hr>
                             <p class="card-text">{{ post.text }}</p>
                             <p class="card-text"><small class="text-muted">{{ post.date }}</small></p>
