@@ -18,7 +18,7 @@ from schemas.user import UserSchema
 from schemas.post import PostSchema
 
 # Para la creacion del topic cuando se registra un nuevo usuario en el sistema
-from kafka import KafkaProducer, producer
+from kafka import KafkaProducer, KafkaConsumer, producer
 from kafka.admin import KafkaAdminClient, NewTopic
 
 admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba", api_version=(0, 10, 1))
@@ -48,7 +48,7 @@ class User(UserMixin, db.Model):
 
 class Post(db.Model):
 	id = db.Column(db.Integer,  primary_key=True, autoincrement=True)
-	img = db.Column(db.String(100))
+	img = db.Column(db.String(100), nullable=True)
 	text = db.Column(db.Text)
 	title = db.Column(db.String(64))
 	iduser = db.Column(db.String(64))
@@ -145,9 +145,12 @@ def upload():
 	id_user = User.query.filter_by(username=current_user.username).first().id
 	file = request.files['inputFile']
 	filename = secure_filename(file.filename)
-	file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-	img = Post(title=title, iduser=id_user, text=text, img=filename, user_id=current_user.id)
+	try:
+		file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+		img = Post(title=title, iduser=id_user, text=text, img=filename, user_id=current_user.id)
+	except:
+		print("No hay foto")
+		img = Post(title=title, iduser=id_user, text=text, img=None, user_id=current_user.id)
 	db.session.add(img)
 	db.session.commit()
 
@@ -187,6 +190,7 @@ def post(idPost):
 	return render_template('posts/post.html', user = current_user, post = post_schema.dump(post))
 
 @app.route('/search', methods=['GET', 'POST'])
+@login_required
 def search():
 	username=request.args.get('search')
 	users = User.query
@@ -194,8 +198,8 @@ def search():
 	users = users.order_by(User.name).all()
 	return jsonify(users_schema.dump(users))
 
-
 @app.route('/verPerfil', methods=['GET', 'POST'])
+@login_required
 def verPerfil():
 	username=request.form['usuarioBuscado']
 	user = User.query.filter_by(username=username).first()
@@ -207,7 +211,16 @@ def verPerfil():
 		return render_template('home/home.html', user=current_user, all_users = results)
 
 
+@app.route('/like', methods=['POST'])
+@login_required
+def like():
+	id_post=request.form['idPost']
+	
+
+	return redirect(url_for("home"))
+
 @app.route('/follow', methods=['POST'])
+@login_required
 def follow():
 	username=request.form['usuarioBuscado']
 	user_id = User.query.filter_by(username=username).first().id
