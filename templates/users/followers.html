@@ -1,10 +1,10 @@
 {% extends "base_template.html" %}
 
-{% block title %}Followings{% endblock %}
+{% block title %}Followers{% endblock %}
 {% block content %}
 
 <div class="row py-3">
-    {% for f in following %}
+    {% for f in followers %}
         <div class="col-md-3">
             <div class="d-flex align-items-center justify-content-between p-2 w-100 border">
                 <form class="search_form" method="POST" id="{{ f.followname }}" action="{{ url_for('verPerfil') }}" >
@@ -12,7 +12,7 @@
                         <img src="https://www.findcollab.com/img/user-folder/5da9aea95eb62user.png" onclick="verPerfil.submit()" class="medium-avatar" />
         
                         <div class="ml-1" style="transform: translateY(-2px)">
-                            <a class="d-block">{{ f.followname }}</a>
+                            <a class="d-block">{{ f.user.username }}</a>
                             <input style="display: none;" name="usuarioBuscado" value="{{ f.followname }}">
                         </div>
                     </div>

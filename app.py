@@ -28,7 +28,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -91,8 +91,15 @@ def json_serializer(data):
 @login_required
 def home():
 	username = current_user.username
-	results = users_schema.dump(User.query.filter(User.username!=username))
-	me_ = mes_schema.dump(Me.query.filter(Me.user_id==current_user.id) )
+	amigos_sugeridos = users_schema.dump(User.query.filter(User.username!=username))
+	me_ = mes_schema.dump(Me.query.filter(Me.user_id==current_user.id))
+	
+	for m in me_:
+		for user in	users_schema.dump(User.query.filter(User.username!=username)):
+			if(m['followname'] == user['username']):
+				amigos_sugeridos.remove(user)
+
+	print(amigos_sugeridos)
 
 	posts = []
 
@@ -108,13 +115,12 @@ def home():
 		if len(posteosDelUserLogueado) != 0:
 			posts = posts + posteosDelUserLogueado
 
-
 	else:
 		posts = posts_schema.dump(Post.query.filter(Post.user_id == current_user.id))
 
 	posts.sort(key=id, reverse=True)
 
-	return render_template('home/home.html', user = current_user, all_users = results, posts = posts)
+	return render_template('home/home.html', user = current_user, amigos_sugeridos = amigos_sugeridos, posts = posts)
 
 
 
@@ -258,11 +264,19 @@ def profile():
 	posts = Post.query.filter_by(iduser=current_user.id)
 	return render_template('users/profile.html' , user = current_user, posts = posts_schema.dump(posts))
 
-@app.route('/following')
+@app.route('/<username>/followings')
 @login_required
-def following():
-	following = mes_schema.dump(Me.query.filter(Me.user_id==current_user.id).all())
+def following(username):
+	user = user_schema.dump(User.query.filter(User.username==username).one())
+	following = mes_schema.dump(Me.query.filter(Me.user_id==user['id']).all())
 	return render_template('users/following.html', following=following)
+
+@app.route('/<username>/followers')
+@login_required
+def followers(username):
+	followers = mes_schema.dump(Me.query.filter(Me.followname==username).all())
+	print(followers)
+	return render_template('users/followers.html', followers=followers)
 
 @app.route('/posts/<idPost>', methods=['GET'])
 @login_required
@@ -287,7 +301,8 @@ def verPerfil():
 	user = User.query.filter_by(username=username).first()
 	if(user):
 		posts = Post.query.filter_by(iduser=user.id)
-		return render_template('users/profile.html' , user = user_schema.dump(user), posts = posts_schema.dump(posts))
+		esta_siguiendo = mes_schema.dump(Me.query.filter(Me.user_id==current_user.id).filter(Me.followname==username))
+		return render_template('users/profile.html' , user = user_schema.dump(user), posts = posts_schema.dump(posts), esta_siguiendo = esta_siguiendo)
 	else:
 		results=users_schema.dump(User.query.all())
 		return render_template('home/home.html', user=current_user, all_users = results)

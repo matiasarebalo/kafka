@@ -10,19 +10,31 @@
             <div class="info_content_title">
                 <h2>{{ user.username }}</h2>
                 {%- if request.path == '/verPerfil' %}
-                    <button class="btn btn-outline-info">
-                        Follow
-                    </button>
+                    {% if esta_siguiendo|length > 0 %}
+                        <button type="submit" class="btn btn-info">Siguiendo</button>                               
+                    {% else %}
+                        <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('follow') }}" >
+                            <div onclick="follow.submit()" class="d-flex align-items-center justify-content-between w-100">
+                                <div style="transform: translateY(-2px); top: 0;" >
+                                    <button type="submit" class="btn btn-info">Seguir</button>                               
+                                    <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
+                                </div>
+                            </div>
+                        </form>
+                    {% endif %}
                 {% else %}
                     <button class="btn btn-outline-info">
-                        Edit Profile
+                        Editar Perfil
                     </button>
                 {% endif %}
             </div>
 
             <div class="follow_btn">
                 <span class="mr-4">
-                    <a href="{{ url_for('following') }}">Following</a>
+                    <a href="{{ url_for('following', username=user.username) }}">Seguidos</a>
+                </span>
+                <span class="mr-4">
+                    <a href="{{ url_for('followers', username=user.username) }}">Seguidores</a>
                 </span>
             </div>
 
