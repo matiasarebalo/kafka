@@ -20,15 +20,13 @@ from kafka import KafkaProducer, KafkaConsumer, TopicPartition
 from kafka.admin import KafkaAdminClient, NewTopic
 
 admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id="prueba", api_version=(0, 10, 1))
-notificaciones_user = []
 posts_followed = []
-
 app = Flask(__name__)
 
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -118,7 +116,7 @@ def home():
 	else:
 		posts = posts_schema.dump(Post.query.filter(Post.user_id == current_user.id))
 
-	posts.sort(key=id, reverse=True)
+	posts = posts[::-1]
 
 	return render_template('home/home.html', user = current_user, amigos_sugeridos = amigos_sugeridos, posts = posts)
 
@@ -146,14 +144,12 @@ def get_notificaciones():
 	nt = []
 
 	for notificacion in consumer_notificaciones:		# Itera entre todos los registros del topic seleccionado
+		print(notificacion)
 		nt.append(notificacion)							# Agrega en la lista todos los registros del topic
 		if fin == notificacion.offset:					# Sale del for cuando llega al final de la lista y no espera por nuevos mensajes
 			break
-
-	notificaciones_user = nt
-
-	notificaciones_user.reverse()
 	consumer_notificaciones.close()
+	return nt
 
 def get_post_kafka():
 	# Topic con las notificaciones para posts nuevos
@@ -369,8 +365,8 @@ def follow():
 @app.route('/notifications', methods=['GET'])
 @login_required
 def notifications():
-	get_notificaciones()
-	return render_template('users/notifications.html', notif=notificaciones_user)
+	notis = get_notificaciones()[::-1]
+	return render_template('users/notifications.html', notif=notis)
 
 
 if __name__=='__main__':
