@@ -28,7 +28,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:20101990@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:2771999@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -92,9 +92,30 @@ def json_serializer(data):
 def home():
 	username = current_user.username
 	results = users_schema.dump(User.query.filter(User.username!=username))
-	posts = posts_schema.dump(Post.query.all())
-	
+	me_ = mes_schema.dump(Me.query.filter(Me.user_id==current_user.id) )
+
+	posts = []
+
+	if len(me_) != 0:
+		for topics in me_:
+
+			elemento = posts_schema.dump(Post.query.filter(Post.user_id == topics["followid"]))
+			if len(elemento) != 0:
+				print("")
+				posts = posts + elemento
+
+		posteosDelUserLogueado = posts_schema.dump(Post.query.filter(Post.user_id == current_user.id))
+		if len(posteosDelUserLogueado) != 0:
+			posts = posts + posteosDelUserLogueado
+
+
+	else:
+		posts = posts_schema.dump(Post.query.filter(Post.user_id == current_user.id))
+
+	posts.sort(key=id, reverse=True)
+
 	return render_template('home/home.html', user = current_user, all_users = results, posts = posts)
+
 
 
 def get_notificaciones():
