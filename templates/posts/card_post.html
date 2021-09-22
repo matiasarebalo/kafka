@@ -30,7 +30,7 @@
             </a>
             <div class="card-body">
                 <h6 class="card-title">                
-                    <a href="{{ url_for('follow') }}">
+                    <a href="{{ url_for('like') }}">
                         <span class="material-icons-outlined" style="vertical-align: -6px;">
                         thumb_up
                         </span>
@@ -91,7 +91,7 @@
                             <p class="card-text">{{ post.text }}</p>
                             <p class="card-text"><small class="text-muted">{{ post.date }}</small></p>
                             <hr>
-                            <a href="{{ url_for('follow') }}">
+                            <a href="{{ url_for('like') }}">
                                 <span class="material-icons-outlined" style="vertical-align: -6px;">
                                 thumb_up
                                 </span>

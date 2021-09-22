@@ -292,8 +292,14 @@ def verPerfil():
 @app.route('/like', methods=['POST'])
 @login_required
 def like():
-	id_post=request.form['idPost']
-	
+	nombre = current_user
+	autor = request.form['autor']			# Nombre del usuario que creo el post
+	posteo = request.form['posteo']			# Titulo de la publicacion
+	topic_notif = autor + '_notificaciones'	# Topic del autor donde notifica
+
+	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
+	producer.send(topic_notif, "A " + nombre.username + " le gusto tu publicacion. " + posteo)
+	producer.close()
 
 	return redirect(url_for("home"))
 
