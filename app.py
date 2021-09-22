@@ -26,7 +26,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:test@localhost/redshift'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -99,27 +99,17 @@ def home():
 
 	print(amigos_sugeridos)
 
-	posts = []
-
-	if len(me_) != 0:
-		for topics in me_:
-
-			elemento = posts_schema.dump(Post.query.filter(Post.user_id == topics["followid"]))
-			if len(elemento) != 0:
-				print("")
-				posts = posts + elemento
-
-		posteosDelUserLogueado = posts_schema.dump(Post.query.filter(Post.user_id == current_user.id))
-		if len(posteosDelUserLogueado) != 0:
-			posts = posts + posteosDelUserLogueado
-
-	else:
-		posts = posts_schema.dump(Post.query.filter(Post.user_id == current_user.id))
-
-	posts = posts[::-1]
-
-	return render_template('home/home.html', user = current_user, amigos_sugeridos = amigos_sugeridos, posts = posts)
-
+	posts = get_post_kafka()[::-1]
+	print(posts)
+	posts = [int(p) for p in posts]
+	print ("posts")
+	print(posts)
+	all_posts = [post_schema.dump(Post.query.filter_by(id=idx).first()) for idx in posts]
+	print ("all_posts")
+	print(all_posts)
+	print("user")
+	print(current_user)
+	return render_template('home/home.html', user = current_user, amigos_sugeridos = amigos_sugeridos, posts = all_posts)
 
 
 def get_notificaciones():
@@ -154,7 +144,9 @@ def get_notificaciones():
 def get_post_kafka():
 	# Topic con las notificaciones para posts nuevos
 	username = current_user.username
-	followed = [] # Cargar con los usuarios a los que sigue
+	user = user_schema.dump(User.query.filter(User.username==username).first())
+	followed = mes_schema.dump(Me.query.filter(Me.user_id==user['id']).all())
+	followed = [f['followname'] for f in followed]
 	tp_usr = []
 	consumer_posts = KafkaConsumer(bootstrap_servers=['localhost:9092'], consumer_timeout_ms=1000)
 
@@ -164,17 +156,22 @@ def get_post_kafka():
 	
 	consumer_posts.assign(tp_usr)
 
+	post_of_following = []
 	for tp in tp_usr:
 		consumer_posts.seek_to_end(tp)
 		fin = consumer_posts.position(tp)
 		consumer_posts.seek_to_beginning(tp)
 
 		for posts in consumer_posts:
-			posts_followed.append(posts)
+			post_of_following.append(posts.value)
+			#posts_followed.append(posts)
 			if fin == posts.offset:
 				break
-
+	print("dentro de post of following")			
+	print(post_of_following)
+	print("dentro de post of following")			
 	consumer_posts.close()
+	return post_of_following
 
 # AUTH
 @app.route('/login', methods=['GET','POST'])
@@ -247,10 +244,9 @@ def upload():
 		img = Post(title=title, iduser=id_user, text=text, img=None, user_id=current_user.id)
 	db.session.add(img)
 	db.session.commit()
-
 	# Creacion de la particion dentro del topic/usuario
 	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
-	producer.send(current_user.username, "Nuevo post")
+	producer.send(current_user.username, img.id)
 	producer.close()
 
 	return redirect(url_for("home"))
