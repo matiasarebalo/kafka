@@ -136,16 +136,22 @@ def get_notificaciones():
 	notificaciones.append(topic_notif)
 	tp_usr = TopicPartition(topic=topic_notif, partition=0)
 
-	consumer_notificaciones.assign([tp_usr])
+	consumer_notificaciones.assign([tp_usr])			# Asigna el topic al consumidor
 
-	consumer_notificaciones.seek_to_end(tp_usr)
-	fin = consumer_notificaciones.position(tp_usr)
-	consumer_notificaciones.seek_to_beginning(tp_usr)
+	consumer_notificaciones.seek_to_end(tp_usr)			# Busca el final de la lista
+	fin = consumer_notificaciones.position(tp_usr)		# Guarda la posicion del ultimo registro
+	consumer_notificaciones.seek_to_beginning(tp_usr)	# Vuelve al inicio de la lista
 
-	for notificacion in consumer_notificaciones:
-		notificaciones_user.append(notificacion)
-		if fin == notificacion.offset:
+	# Lista para guardar los registros traidos de kafka
+	nt = []
+
+	for notificacion in consumer_notificaciones:		# Itera entre todos los registros del topic seleccionado
+		nt.append(notificacion)							# Agrega en la lista todos los registros del topic
+		if fin == notificacion.offset:					# Sale del for cuando llega al final de la lista y no espera por nuevos mensajes
 			break
+
+	notificaciones_user = nt
+
 	notificaciones_user.reverse()
 	consumer_notificaciones.close()
 
