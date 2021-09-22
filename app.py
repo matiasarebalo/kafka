@@ -100,15 +100,8 @@ def home():
 	print(amigos_sugeridos)
 
 	posts = get_post_kafka()[::-1]
-	print(posts)
 	posts = [int(p) for p in posts]
-	print ("posts")
-	print(posts)
 	all_posts = [post_schema.dump(Post.query.filter_by(id=idx).first()) for idx in posts]
-	print ("all_posts")
-	print(all_posts)
-	print("user")
-	print(current_user)
 	return render_template('home/home.html', user = current_user, amigos_sugeridos = amigos_sugeridos, posts = all_posts)
 
 
