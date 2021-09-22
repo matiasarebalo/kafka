@@ -28,7 +28,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = '9OLWxND4o83j4K4iuopO'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:2771999@localhost/kafka'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:root@localhost/kafka'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads/'
 
@@ -126,7 +126,7 @@ def get_notificaciones():
 
 	consumer_notificaciones = KafkaConsumer(bootstrap_servers=['localhost:9092'], consumer_timeout_ms=1000)
 
-	# Topic del propio usuario para saber si si alguien le dio like o lo sigue 
+	# Topic del propio usuario para saber si alguien le dio like o lo sigue 
 	notificaciones.append(topic_notif)
 	tp_usr = TopicPartition(topic=topic_notif, partition=0)
 
@@ -140,7 +140,7 @@ def get_notificaciones():
 		notificaciones_user.append(notificacion)
 		if fin == notificacion.offset:
 			break
-
+	notificaciones_user.reverse()
 	consumer_notificaciones.close()
 
 def get_post_kafka():
@@ -223,18 +223,6 @@ def logout():
 	logout_user()
 	return redirect(url_for("log_in"))
 
-# Users functionality
-@app.route('/news')
-@login_required
-def news():
-	#posts = posts_schema.dump(Post.query.all())
-	posts= db.session.query(Post,User,Me).join(User).join(Me).filter(Post.user_id==Me.followid).all()
-	#filter(Post.user_id=Me.followid).all()
-	return render_template('users/news.html', posts = posts)
-
-	return render_template('users/news.html', posts = posts)
-
-
 @app.route('/publish' , methods=['POST'])
 @login_required
 def upload():
@@ -269,11 +257,6 @@ def search_users():
 def profile():
 	posts = Post.query.filter_by(iduser=current_user.id)
 	return render_template('users/profile.html' , user = current_user, posts = posts_schema.dump(posts))
-
-@app.route('/followers')
-@login_required
-def followers():
-	return render_template('users/followers.html')
 
 @app.route('/following')
 @login_required
@@ -313,13 +296,13 @@ def verPerfil():
 @app.route('/like', methods=['POST'])
 @login_required
 def like():
-	nombre = current_user
-	autor = request.form['autor']			# Nombre del usuario que creo el post
-	posteo = request.form['posteo']			# Titulo de la publicacion
+	nombre = current_user.username
+	titulo = request.form['title'][:30]+"..." if len(request.form['title'])>30 else request.form['title']+"..."
+	autor = request.form['usuarioBuscado'] # Nombre del usuario que creo el post
 	topic_notif = autor + '_notificaciones'	# Topic del autor donde notifica
 
 	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
-	producer.send(topic_notif, "A " + nombre.username + " le gusto tu publicacion. " + posteo)
+	producer.send(topic_notif, f"A {nombre} le gusto tu publicacion: {titulo}")
 	producer.close()
 
 	return redirect(url_for("home"))
@@ -332,35 +315,34 @@ def follow():
 	id_user = User.query.filter_by(username=current_user.username).first().id
 	
 	# Aca va el codigo para seguir al usuario al usuario
-	me = Me(followname=username, user_id=id_user,followid=follow_id)
-	db.session.add(me)
-	db.session.commit()
+	if Me.query.filter_by(user_id=id_user, followid=follow_id).first() is None:
+		me = Me(followname=username, user_id=id_user,followid=follow_id)
+		db.session.add(me)
+		db.session.commit()
 
-	#
-	user_id = User.query.filter_by(username=username).first().id
+		# Agrega a la lista de seguidores al usuario logueado
+		nombre = current_user
+		topic_notif = username + '_notificaciones'
+		consumer = KafkaConsumer(group_id=nombre.username, bootstrap_servers=['localhost:9092'], consumer_timeout_ms=1000)
+		tp = TopicPartition(username, 0)
+		consumer.assign([tp])
 
-	# Agrega a la lista de seguidores al usuario logueado
-	nombre = current_user
-	topic_notif = username + '_notificaciones'
-	consumer = KafkaConsumer(group_id=nombre.username, bootstrap_servers=['localhost:9092'], consumer_timeout_ms=1000)
-	tp = TopicPartition(username, 0)
-	consumer.assign([tp])
+		consumer.seek_to_end(tp)
+		last_offset = consumer.position(tp)
+		consumer.seek_to_beginning(tp)
 
-	consumer.seek_to_end(tp)
-	last_offset = consumer.position(tp)
-	consumer.seek_to_beginning(tp)
+		for m in consumer:
+			if m.offset == last_offset - 1:
+				break
 
-	for m in consumer:
-		if m.offset == last_offset - 1:
-			break
+		consumer.close()
 
-	consumer.close()
-
-	# Envía la notificación al usuario al que comenzó a seguir
-	producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
-	producer.send(topic_notif, "Comenzo a seguirte " + nombre.username)
-	producer.close()
-
+		# Envía la notificación al usuario al que comenzó a seguir
+		producer = KafkaProducer(bootstrap_servers=['localhost:9092'], value_serializer=json_serializer)
+		producer.send(topic_notif, f"{nombre.username} comenzo a seguirte.")
+		producer.close()
+	else:
+		flash("Usted ya sigue a este usuario")
 	return redirect(url_for("home"))
 
 @app.route('/notifications', methods=['GET'])

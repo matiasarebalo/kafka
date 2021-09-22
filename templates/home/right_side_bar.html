@@ -39,7 +39,7 @@
                     </form>
                     <form class="search_form" method="POST" id="{{ user.username }}" action="{{ url_for('follow') }}" >
                         <div onclick="follow.submit()" class="d-flex align-items-center justify-content-between w-100">
-                            <div class=" small ml-1 mt-4" style="transform: translateY(-2px); top: 0;" >
+                            <div class="small mt-4" style="transform: translateY(-2px); top: 0;" >
                                 <button type="submit" style="opacity: 0.7; border: none; cursor: pointer; text-decoration: underline;">Seguir</button>                               
                                 <input style="display: none;" name="usuarioBuscado" value="{{ user.username }}">
                             </div>

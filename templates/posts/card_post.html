@@ -29,12 +29,16 @@
                 <img src="{{ url_for('static', filename='uploads/') }}{{ post['img'] }}" class="card-img-top" style="border-radius: 0;" alt="...">
             </a>
             <div class="card-body">
-                <h6 class="card-title">                
-                    <a href="{{ url_for('like') }}">
-                        <span class="material-icons-outlined" style="vertical-align: -6px;">
-                        thumb_up
-                        </span>
-                    </a>
+                <h6 class="card-title">
+                    <form class="search_form" method="POST" action="{{ url_for('like') }}">
+                        <div onclick="document.getElementById('{{ post.user.username }}').submit()"  class="d-flex align-items-center justify-content-between w-100" style="cursor: pointer;">                    
+                            <button class="material-icons-outlined" style="vertical-align: -6px;border: none;background: none;">
+                                thumb_up
+                            </button>
+                            <input style="display: none;" name="usuarioBuscado" value="{{ post.user.username }}">
+                            <input style="display: none;" name="title" value="{{ post.text }}">
+                        </div>                
+                    </form>
                 </h6>
                 <h6 class="card-title">
                     {% if post.user.username == user.username %}
@@ -91,11 +95,15 @@
                             <p class="card-text">{{ post.text }}</p>
                             <p class="card-text"><small class="text-muted">{{ post.date }}</small></p>
                             <hr>
-                            <a href="{{ url_for('like') }}">
-                                <span class="material-icons-outlined" style="vertical-align: -6px;">
-                                thumb_up
-                                </span>
-                            </a>
+                            <form class="search_form" method="POST" action="{{ url_for('like') }}">
+                                <div onclick="document.getElementById('{{ post.user.username }}').submit()"  class="d-flex align-items-center justify-content-between w-100" style="cursor: pointer;">                    
+                                    <button class="material-icons-outlined" style="vertical-align: -6px;border: none;background: none;">
+                                        thumb_up
+                                        </button>
+                                    <input style="display: none;" name="usuarioBuscado" value="{{ post.user.username }}">
+                                    <input style="display: none;" name="title" value="{{ post.text }}">
+                                </div>                
+                            </form>
                         </div>
                     </div>
                 </div>
